@@ -10,6 +10,7 @@ app.get('/temperature_updates', function(request, response) {
   response.sendStatus(200);
 });
 app.post('/temperature_updates', function(request, response) {
+  console.log(response)
   console.log(response.query)
   console.log(response.body)
   response.sendStatus(200);
