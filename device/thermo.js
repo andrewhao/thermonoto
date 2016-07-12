@@ -18,11 +18,11 @@ setInterval(function() {
   console.log('celsius:', temp_C);
   console.log('fahrehneit:', temp_F);
 
-  var url = 'https://hazel-bison.hyperdev.space/temperature_updates';
+  var url = 'http://thermonoto.herokuapp.com/temperature_updates';
   var data = 'data=' + temp_F;
 
   console.log("POSTing to", url, data);
-  //request.post(url).form({temperature: temp_F});
-  request.get(url)
-}, 1000);
+  request.post(url).form({temperature: temp_F});
+  //request.get(url, handleResponse);
+}, 10000);
 
