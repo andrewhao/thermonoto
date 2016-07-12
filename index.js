@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.raw());
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -12,6 +12,7 @@ app.get('/temperature_updates', function(request, response) {
 app.post('/temperature_updates', function(request, response) {
   console.log(request.query)
   console.log(request.body)
+  console.log(request)
   response.sendStatus(200);
 });
 
