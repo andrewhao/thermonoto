@@ -19,7 +19,7 @@ app.get('/temperature_updates', function(request, response) {
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
   keen.addEvent("temperature_updates", {
-    temperature: request.body.temperature,
+    temperature: parseFloat(request.body.temperature),
     receivedAt: new Date()
   }, function(err, res) {
     if(err) {
