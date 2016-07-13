@@ -6,7 +6,26 @@ var request = require('request');
 
 console.log('connected');
 
-setInterval(function() {
+function toggleLed(ledIdx, cycles) {
+  var cycle = 0,
+  	  maxCycles = cycles,
+      lights = [ledIdx];
+
+  var ledTimer = setInterval(function () {
+      lights.forEach(function(light){
+          tessel.led[light].toggle();
+      });
+
+      cycle++;
+      if (cycle == maxCycles) {
+          cycle = 0;
+          clearInterval(ledTimer);
+      }
+  }, 100);
+}
+
+
+function readTemperatureAndReport() {
   console.log('reading temp')
   var pin = gpio.analog[0];
   console.log(pin)
@@ -19,17 +38,27 @@ setInterval(function() {
   console.log('fahrehneit:', temp_F);
 
   var url = 'http://thermonoto.herokuapp.com/temperature_updates';
-  var data = 'data=' + temp_F;
+  var data = {temperature: temp_F};
 
   console.log("POSTing to", url, data);
-  request.post(url).form({temperature: temp_F});
-  //request.get(url, handleResponse);
-}, 10000);
+	toggleLed(0, 2);
+  request.post({url: url, form: data}, function(e, res) {
+    if (!e) {
+			console.log('success', res.body)
+			toggleLed(1, 2);
+		}
+    else { console.error("http error", e) }
+	});
+}
 
 wifi.on("connect", function(data) {
+	setInterval(readTemperatureAndReport, 10000)
+	toggleLed(0, 100);
   console.log('wifi> on:connect', data);
 });
 wifi.on("disconnect", function(data) {
+	clearInterval(readTemperatureAndReport)
+	toggleLed(1, 100);
   console.log('wifi> on:disconnect', data);
 });
 wifi.on("timeout", function(data) {
@@ -45,6 +74,13 @@ wifi.on("error", function(data) {
   console.log('wifi> on:error', data);
 });
 
-console.log("Running...")
-console.log("%j", wifiManager)
-wifiManager.connect()
+console.log("Running thermo.js...")
+setTimeout(function() {
+	console.log("[wifiManager] Connecting with the wifiManager..")
+  wifiManager.connect(function(err, res) {
+		if(!err) {
+			console.log('[wifiManager] connected', res);
+		}
+    else { console.error('[wifiManager] connection error', err) }
+  })
+}, 6000);
