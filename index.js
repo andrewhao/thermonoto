@@ -8,7 +8,7 @@ keen = keenIO.configure({
   writeKey: process.env.KEEN_WRITE_KEY
 });
 
-app.use(bodyParser.raw());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -18,12 +18,16 @@ app.get('/temperature_updates', function(request, response) {
 
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
-  keen.addEvent("temperature_updates", { temperature: request.body.temperature }, function(err, res) {
+  keen.addEvent("temperature_updates", {
+    temperature: request.body.temperature,
+    receivedAt: new Date()
+  }, function(err, res) {
     if(err) {
       console.error("Error updating Keen", err);
       throw "Error updating Keen.";
     }
     else {
+      console.log('successfully logged to Keen')
       response.sendStatus(200);
     }
   });
