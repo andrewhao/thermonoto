@@ -7,7 +7,7 @@ var wifiManager = {
     console.log("[wifiManager] Connecting to %s...", config.wifi.network)
 		console.log(config.wifi)
     // Green blink
-    toggleLed(0, 2, 1000)
+    toggleLed(0, 4, 1000)
 
     wifi.connect({
       security: config.wifi.security || 'wpa2'
@@ -19,7 +19,7 @@ var wifiManager = {
   powerCycle: function powerCycle() {
     wifi.reset(function() {
       // Blue blink
-      toggleLed(1, 2, 1000);
+      toggleLed(1, 4, 1000);
       console.log('[wifiManager] Reset called');
       var tryAgain = function() {
         if (!wifi.isConnected()) {
