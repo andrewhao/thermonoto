@@ -3,27 +3,7 @@ var wifiManager = require('./wifi');
 var wifi = require('wifi-cc3000');
 var gpio = tessel.port.GPIO;
 var request = require('request');
-
-console.log('connected');
-
-function toggleLed(ledIdx, cycles) {
-  var cycle = 0,
-  	  maxCycles = cycles,
-      lights = [ledIdx];
-
-  var ledTimer = setInterval(function () {
-      lights.forEach(function(light){
-          tessel.led[light].toggle();
-      });
-
-      cycle++;
-      if (cycle == maxCycles) {
-          cycle = 0;
-          clearInterval(ledTimer);
-      }
-  }, 100);
-}
-
+var toggleLed = require('./toggleLed');
 
 function readTemperatureAndReport() {
   console.log('reading temp')
@@ -63,12 +43,7 @@ wifi.on("disconnect", function(data) {
 });
 wifi.on("timeout", function(data) {
   console.log('wifi> on:timeout', data);
-  if (timeouts-- > 0) {
-    console.log("simple reconnect...");
-    wifiManager.connect()
-  } else {
-    wifiManager.powerCycle()
-  }
+  wifiManager.powerCycle()
 });
 wifi.on("error", function(data) {
   console.log('wifi> on:error', data);
