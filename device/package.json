@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/andrewhao/thermonoto#readme",
   "dependencies": {
-    "request": "2.73.0"
+    "request": "2.73.0",
+    "tessel-led": "0.0.1",
+    "tessel-wifi": "0.0.1"
   }
 }

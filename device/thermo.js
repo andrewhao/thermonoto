@@ -3,7 +3,9 @@ var wifiManager = require('./wifiManager');
 var wifi = require('wifi-cc3000');
 var gpio = tessel.port.GPIO;
 var request = require('request');
-var toggleLed = require('./toggleLed');
+var led = require('tessel-led');
+var tesselWifi = require('tessel-wifi');
+var config = require("./config.json");
 
 function readTemperatureAndReport() {
   console.log('reading temp');
@@ -21,45 +23,50 @@ function readTemperatureAndReport() {
   var data = {temperature: temp_F};
 
   console.log("POSTing to", url, data);
-	toggleLed(0, 2);
+  led.blue.flash(5, 50);
   request.post({url: url, form: data}, function(e, res) {
     if (!e) {
 			console.log('success', res.body);
-			toggleLed(1, 2);
+      led.blue.flash(10, 25);
 		}
-    else { console.error("http error", e); }
+    else {
+      led.red.flash(5, 50);
+      console.error("http error", e);
+    }
 	});
 }
 
-wifi.on("connect", function(data) {
-	setInterval(readTemperatureAndReport, 10000);
-	toggleLed(0, 100);
-  console.log('wifi> on:connect', data);
+function handleWifiError(err) {
+  console.error(err);
+  led.red.blink();
+}
+
+var wifi = new tesselWifi({
+  ssid: config.wifi.network,
+  password: config.wifi.password,
+  DEBUG: true,
 });
 
-wifi.on("disconnect", function(data) {
-	clearInterval(readTemperatureAndReport);
-	toggleLed(1, 100);
-  console.log('wifi> on:disconnect', data);
-});
-
-wifi.on("timeout", function(data) {
-  console.log('wifi> on:timeout', data);
-  wifiManager.powerCycle();
-});
-
-wifi.on("error", function(data) {
-  console.log('wifi> on:error', data);
-});
+wifi.on("connect", function(err, data) {
+  if (!err) {
+    setInterval(readTemperatureAndReport, 10000);
+    led.green.show();
+    console.log('wifi> on:connect', data);
+  }
+  else {
+    handleWifiError(err);
+  }
+})
+.on("disconnect", function(err, data) {
+  if (!err) {
+    led.green.hide();
+    clearInterval(readTemperatureAndReport);
+    console.log('wifi> on:disconnect', data);
+  } else {
+    handleWifiError(err);
+  }
+})
+.on('error', handleWifiError);
 
 console.log("Running thermo.js...");
 
-setTimeout(function() {
-	console.log("[wifiManager] Connecting with the wifiManager..");
-  wifiManager.connect(function(err, res) {
-		if(!err) {
-			console.log('[wifiManager] connected', res);
-		}
-    else { console.error('[wifiManager] connection error', err); }
-  })
-}, 6000);
