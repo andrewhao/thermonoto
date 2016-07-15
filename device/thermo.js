@@ -1,6 +1,4 @@
 var tessel = require('tessel');
-var wifiManager = require('./wifiManager');
-var wifi = require('wifi-cc3000');
 var gpio = tessel.port.GPIO;
 var request = require('request');
 var led = require('tessel-led');
@@ -38,33 +36,30 @@ function readTemperatureAndReport() {
 
 function handleWifiError(err) {
   console.error(err);
+  wifi.reconnect();
   led.red.blink();
 }
+
+tesselWifi.prototype.DEBUG = true;
 
 var wifi = new tesselWifi({
   ssid: config.wifi.network,
   password: config.wifi.password,
-  DEBUG: true,
+  reconnect: 10,
+  powerCycle: 5,
 });
+console.log('booting with wifi config', config.wifi)
+console.log(wifi);
 
-wifi.on("connect", function(err, data) {
-  if (!err) {
-    setInterval(readTemperatureAndReport, 10000);
-    led.green.show();
-    console.log('wifi> on:connect', data);
-  }
-  else {
-    handleWifiError(err);
-  }
+wifi.on("connect", function(data) {
+  console.log('wifi> on:connect', data);
+  setInterval(readTemperatureAndReport, 10000);
+  led.green.show();
 })
-.on("disconnect", function(err, data) {
-  if (!err) {
-    led.green.hide();
-    clearInterval(readTemperatureAndReport);
-    console.log('wifi> on:disconnect', data);
-  } else {
-    handleWifiError(err);
-  }
+.on("disconnect", function(data) {
+  console.log('wifi> on:disconnect', data);
+  led.green.hide();
+  clearInterval(readTemperatureAndReport);
 })
 .on('error', handleWifiError);
 
