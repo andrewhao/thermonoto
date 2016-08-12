@@ -20,6 +20,7 @@ app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
   keen.addEvent("temperature_updates", {
     temperature: parseFloat(request.body.temperature),
+    humidity: parseFloat(request.body.humidity),
     receivedAt: new Date()
   }, function(err, res) {
     if(err) {
