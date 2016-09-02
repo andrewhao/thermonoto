@@ -20,7 +20,8 @@ var time = new Date();
 
 function toggleFan(temp, cb) {
   console.log("toggling fan", temp);
-  if (temp > TEMP_THRESHOLD && time.getHours() > TIME_HOUR_THRESHOLD) {
+  var isValidTime = (time.getHours() > TIME_HOUR_THRESHOLD) || (time.getHours() < 8);
+  if (temp > TEMP_THRESHOLD && isValidTime) {
     console.log('OVER threshold');
     request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
     .on('response', cb);
