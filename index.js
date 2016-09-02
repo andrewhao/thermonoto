@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var keenIO = require('keen.io');
+var request = require('request');
 var app = express();
 
 keen = keenIO.configure({
@@ -9,8 +10,25 @@ keen = keenIO.configure({
 });
 
 app.use(bodyParser.urlencoded({extended: true}));
-
 app.set('port', (process.env.PORT || 5000));
+
+// Only auto-turn on the fan if it's hotter than 74 degrees.
+var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
+// Only turn on the fan after 10PM
+var TIME_HOUR_THRESHOLD = parseInt(process.env.TIME_HOUR_THRESHOLD) || 21;
+
+function toggleFan(temp, cb) {
+  console.log("toggling fan", temp);
+  if (temp > TEMP_THRESHOLD && time.getHours() > TIME_HOUR_THRESHOLD) {
+    console.log('OVER threshold');
+    request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
+    .on('response', cb);
+  } else {
+    console.log('UNDER threshold');
+    request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
+    .on('response', cb);
+  }
+};
 
 app.get('/temperature_updates', function(request, response) {
   response.sendStatus(200);
@@ -18,8 +36,9 @@ app.get('/temperature_updates', function(request, response) {
 
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
+  var temperature = parseFloat(request.body.temperature);
   keen.addEvent("temperature_updates", {
-    temperature: parseFloat(request.body.temperature),
+    temperature: temperature,
     humidity: parseFloat(request.body.humidity),
     receivedAt: new Date()
   }, function(err, res) {
@@ -28,8 +47,11 @@ app.post('/temperature_updates', function(request, response) {
       throw "Error updating Keen.";
     }
     else {
-      console.log('successfully logged to Keen')
-      response.sendStatus(200);
+      console.log('successfully logged to Keen');
+      toggleFan(temperature, function() {
+        console.log('sent command to IFTTT with temp', temperature);
+        response.sendStatus(200);
+      });
     }
   });
 });
