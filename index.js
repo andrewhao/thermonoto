@@ -14,19 +14,30 @@ app.set('port', (process.env.PORT || 5000));
 
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
-// Only turn on the fan after 10PM
-var TIME_HOUR_THRESHOLD = parseInt(process.env.TIME_HOUR_THRESHOLD) || 21;
-var time = new Date();
+
+function fanManagementEnabled() {
+  // Enable fan management within certain time thresholds.
+  var time = new Date();
+  var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD) || 21;
+  var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD) || 6;
+
+  return (time.getHours() > START_TIME_HOUR_THRESHOLD) ||
+    (time.getHours() < END_TIME_HOUR_THRESHOLD);
+}
 
 function toggleFan(temp, cb) {
+  if (!fanManagementEnabled()) {
+    console.log("Outside the hours of fan management. Skipping....");
+    return cb.call();
+  }
+
   console.log("toggling fan", temp);
-  var isValidTime = (time.getHours() > TIME_HOUR_THRESHOLD) || (time.getHours() < 8);
-  if (temp > TEMP_THRESHOLD && isValidTime) {
-    console.log('OVER threshold');
+  if (temp > TEMP_THRESHOLD) {
+    console.log('OVER threshold. Turning on the fan...');
     request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
     .on('response', cb);
   } else {
-    console.log('UNDER threshold');
+    console.log('UNDER threshold. Turning off the fan...');
     request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
     .on('response', cb);
   }
@@ -51,7 +62,6 @@ app.post('/temperature_updates', function(request, response) {
     else {
       console.log('successfully logged to Keen');
       toggleFan(temperature, function() {
-        console.log('sent command to IFTTT with temp', temperature);
         response.sendStatus(200);
       });
     }
