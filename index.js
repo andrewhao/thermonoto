@@ -16,6 +16,7 @@ app.set('port', (process.env.PORT || 5000));
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 // Only turn on the fan after 10PM
 var TIME_HOUR_THRESHOLD = parseInt(process.env.TIME_HOUR_THRESHOLD) || 21;
+var time = new Date();
 
 function toggleFan(temp, cb) {
   console.log("toggling fan", temp);
