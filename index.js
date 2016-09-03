@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var keenIO = require('keen.io');
 var request = require('request');
 var app = express();
+var moment = require('moment-timezone');
 
 keen = keenIO.configure({
   projectId: process.env.KEEN_PROJECT_ID,
@@ -17,12 +18,12 @@ var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 
 function fanManagementEnabled() {
   // Enable fan management within certain time thresholds.
-  var time = new Date();
+  var time = moment().tz('America/Los_Angeles');
   var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD) || 21;
   var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD) || 6;
 
-  return (time.getHours() > START_TIME_HOUR_THRESHOLD) ||
-    (time.getHours() < END_TIME_HOUR_THRESHOLD);
+  return (time.hour() > START_TIME_HOUR_THRESHOLD) ||
+    (time.hour() < END_TIME_HOUR_THRESHOLD);
 }
 
 function toggleFan(temp, cb) {
