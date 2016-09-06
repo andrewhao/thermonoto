@@ -29,18 +29,18 @@ function fanManagementEnabled() {
 function toggleFan(temp, cb) {
   if (!fanManagementEnabled()) {
     console.log("Outside the hours of fan management. Skipping....");
-    return cb.call();
+    return cb(false);
   }
 
   console.log("toggling fan", temp);
   if (temp > TEMP_THRESHOLD) {
     console.log('OVER threshold. Turning on the fan...');
     request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
-    .on('response', cb);
+      .on('response', function() { return cb(true) });
   } else {
     console.log('UNDER threshold. Turning off the fan...');
     request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
-    .on('response', cb);
+    .on('response', function() { return cb(false) });
   }
 };
 
@@ -51,21 +51,23 @@ app.get('/temperature_updates', function(request, response) {
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
-  keen.addEvent("temperature_updates", {
-    temperature: temperature,
-    humidity: parseFloat(request.body.humidity),
-    receivedAt: new Date()
-  }, function(err, res) {
-    if(err) {
-      console.error("Error updating Keen", err);
-      throw "Error updating Keen.";
-    }
-    else {
-      console.log('successfully logged to Keen');
-      toggleFan(temperature, function() {
+
+  toggleFan(temperature, function(isFanOn) {
+    keen.addEvent("temperature_updates", {
+      temperature: temperature,
+      humidity: parseFloat(request.body.humidity),
+      isFanOn: isFanOn,
+      receivedAt: new Date()
+    }, function(err, res) {
+      if(err) {
+        console.error("Error updating Keen", err);
+        throw "Error updating Keen.";
+      }
+      else {
+        console.log('successfully logged to Keen');
         response.sendStatus(200);
-      });
-    }
+      }
+    });
   });
 });
 
