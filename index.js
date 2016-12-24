@@ -57,6 +57,7 @@ app.post('/temperature_updates', function(request, response) {
       temperature: temperature,
       humidity: parseFloat(request.body.humidity),
       isFanOn: isFanOn,
+      device_id: request.body.device_id,
       receivedAt: new Date()
     }, function(err, res) {
       if(err) {
