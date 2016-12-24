@@ -40,7 +40,7 @@ pin = 4
 humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 temperature = temperature * 9/5.0 + 32
 
-data = dict(temperature=temperature, humidity=humidity)
+data = dict(temperature=temperature, humidity=humidity, device_id='rpi2')
 
 response = requests.post('http://thermonoto.herokuapp.com/temperature_updates', data=data)
 print('Posting with', data)
