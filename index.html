@@ -1,0 +1,47 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Thermonoto</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/keen-js/3.4.1/keen.min.js"></script>
+
+    </head>
+    <body>
+        <!--[if lte IE 9]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+        <![endif]-->
+        <div id="daily_humidity"></div>
+
+        <script>
+var client = new Keen({
+  projectId: "5786691233e40614f79844e2",
+  readKey: "1d40bf9bbc24ce048783abb7b3c9b2a6ce6b4590aa28a495a4b46defe2108f6b8c4641da03bf038f7efe6fa407159360eb5ad9198f113dc3c35b87ed9f16c7badf53a3e349e71d2943dca1f5ae6dd3a829f0e192bf5546adbee78883de0c5720"
+});
+
+Keen.ready(function(){
+
+  var query = new Keen.Query("average", {
+    event_collection: "temperature_updates",
+    group_by: [
+    "device_id"
+],
+    interval: "hourly",
+    target_property: "humidity",
+    timeframe: "this_24_hours",
+    timezone: "US/Pacific"
+  });
+
+  client.draw(query, document.getElementById("daily_humidity"), {
+    height: window.innerHeight
+  });
+
+});
+        </script>
+    </body>
+</html>

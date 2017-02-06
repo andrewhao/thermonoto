@@ -4,6 +4,7 @@ var keenIO = require('keen.io');
 var request = require('request');
 var app = express();
 var moment = require('moment-timezone');
+var path = require('path');
 
 keen = keenIO.configure({
   projectId: process.env.KEEN_PROJECT_ID,
@@ -43,6 +44,10 @@ function toggleFan(temp, cb) {
     .on('response', function() { return cb(false) });
   }
 };
+
+app.get('/', function(request, response) {
+  response.sendFile(path.join(__dirname + '/index.html'));
+});
 
 app.get('/temperature_updates', function(request, response) {
   response.sendStatus(200);
