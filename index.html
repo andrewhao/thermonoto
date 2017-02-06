@@ -39,7 +39,8 @@ Keen.ready(function(){
 
   client.draw(query, document.getElementById("daily_humidity"), {
     title: "Last Day Humidity",
-    height: window.innerHeight
+    height: window.innerHeight,
+    vAxis: { gridLines: 12 }
   });
 
 });
