@@ -20,8 +20,8 @@ var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 function fanManagementEnabled() {
   // Enable fan management within certain time thresholds.
   var time = moment().tz('America/Los_Angeles');
-  var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD) || 21;
-  var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD) || 6;
+  var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD);
+  var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD);
 
   console.log('Current hour is:', time.hour());
   console.log('Start time: ', START_TIME_HOUR_THRESHOLD);
