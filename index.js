@@ -23,7 +23,7 @@ function fanManagementEnabled() {
   var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD) || 21;
   var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD) || 6;
 
-  return (time.hour() > START_TIME_HOUR_THRESHOLD) ||
+  return (time.hour() >= START_TIME_HOUR_THRESHOLD) ||
     (time.hour() < END_TIME_HOUR_THRESHOLD);
 }
 
@@ -56,11 +56,12 @@ app.get('/temperature_updates', function(request, response) {
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
+  var humidity = parseFloat(request.body.humidity);
 
-  toggleFan(temperature, function(isFanOn) {
+  toggleFan(humidity, function(isFanOn) {
     keen.addEvent("temperature_updates", {
       temperature: temperature,
-      humidity: parseFloat(request.body.humidity),
+      humidity: humidity,
       isFanOn: isFanOn,
       device_id: request.body.device_id,
       receivedAt: new Date()
