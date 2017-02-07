@@ -23,6 +23,10 @@ function fanManagementEnabled() {
   var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD) || 21;
   var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD) || 6;
 
+  console.log('Current hour is:', time.hour());
+  console.log('Start time: ', START_TIME_HOUR_THRESHOLD);
+  console.log('End time: ', END_TIME_HOUR_THRESHOLD);
+
   return (time.hour() >= START_TIME_HOUR_THRESHOLD) &&
     (time.hour() < END_TIME_HOUR_THRESHOLD);
 }
