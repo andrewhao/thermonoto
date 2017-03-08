@@ -5,6 +5,12 @@ var request = require('request');
 var app = express();
 var moment = require('moment-timezone');
 var path = require('path');
+var redis = require("redis");
+var redisClient = redis.createClient();
+var Promise = require('bluebird');
+
+Promise.promisifyAll(redis.RedisClient.prototype);
+Promise.promisifyAll(redis.Multi.prototype);
 
 keen = keenIO.configure({
   projectId: process.env.KEEN_PROJECT_ID,
@@ -51,6 +57,36 @@ function toggleFan(temp, cb) {
 
 app.get('/', function(request, response) {
   response.sendFile(path.join(__dirname + '/index.html'));
+});
+
+app.get('/operating_hours', function(request, response) {
+  var getStartTime = redisClient.getAsync("start_time");
+  var getEndTime = redisClient.getAsync('end_time');
+  Promise.all([getStartTime, getEndTime])
+  .then(function(results) {
+    var startTime = results[0];
+    var endTime = results[1];
+    var hours = {
+      start_time: startTime,
+      end_time: endTime
+    };
+    response.json(hours);
+  });
+});
+
+app.put('/operating_hours', function(request, response) {
+  console.log(request.body);
+  var hours = {
+    start_time: request.body.start_time,
+    end_time: request.body.end_time
+  };
+  redisClient.setAsync("start_time", hours.start_time)
+  .then(function() {
+    return redisClient.setAsync("end_time", hours.end_time);
+  })
+  .then(function() {
+    response.json(hours);
+  });
 });
 
 app.get('/temperature_updates', function(request, response) {
