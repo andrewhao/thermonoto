@@ -6,7 +6,9 @@ var app = express();
 var moment = require('moment-timezone');
 var path = require('path');
 var redis = require("redis");
-var redisClient = redis.createClient();
+
+var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
+var redisClient = redis.createClient(redisUrl);
 var Promise = require('bluebird');
 
 Promise.promisifyAll(redis.RedisClient.prototype);
