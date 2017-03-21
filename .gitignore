@@ -13,3 +13,6 @@ npm-debug.log
 Dockerfile
 docker-compose.yml
 *.rdb
+
+# Elm
+elm-stuff
