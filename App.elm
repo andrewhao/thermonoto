@@ -46,8 +46,8 @@ view model =
     [ h2 [] [text "Operating Hours"]
     , button [ onClick RefreshOperatingHours ] [ text "Refresh" ]
     , br [] []
-    , p [] [text (model.startTime |> toString)]
-    , p [] [text (model.endTime |> toString)]
+    , p [] [text model.startTime]
+    , p [] [text model.endTime]
     ]
 
 -- SUBSCRIPTIONS
