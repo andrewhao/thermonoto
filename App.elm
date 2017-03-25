@@ -22,6 +22,8 @@ init =
 type Msg
   = RefreshOperatingHours
   | UpdateOperatingHours
+  | UpdateStartTime String
+  | UpdateEndTime String
   | ReceiveOperatingHoursDetails (Result Http.Error JsonResponse)
   | ReceiveUpdatedOperatingHoursDetails (Result Http.Error JsonResponse)
 
@@ -40,6 +42,14 @@ update msg model =
          (Maybe.withDefault "" jsonResponse.start_time)
          (Maybe.withDefault "" jsonResponse.end_time)
       , Cmd.none)
+
+    UpdateStartTime newStartTime ->
+      { model | startTime = newStartTime }
+         ! []
+
+    UpdateEndTime newEndTime ->
+      { model | endTime = newEndTime }
+         ! []
 
     ReceiveOperatingHoursDetails (Err err) ->
       Debug.log (toString err)
@@ -64,8 +74,8 @@ view model =
     [ h2 [] [text "Operating Hours"]
     , button [ onClick RefreshOperatingHours ] [ text "Refresh" ]
     , br [] []
-    , input [ id "end_time", type_ "text", value model.endTime ] []
-    , input [ id "start_time", type_ "text", value model.startTime ] []
+    , input [ id "end_time", type_ "text", Html.Attributes.value model.endTime, onInput UpdateEndTime ] []
+    , input [ id "start_time", type_ "text", Html.Attributes.value model.startTime, onInput UpdateStartTime ] []
     , button [ onClick UpdateOperatingHours ] [ text "Update" ]
     , br [] []
     , p [] [text model.startTime]
