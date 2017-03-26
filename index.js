@@ -23,6 +23,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static('public'))
 
+app.set('view engine', 'ejs');
+
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 
@@ -59,7 +61,7 @@ function toggleFan(temp, cb) {
 };
 
 app.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname + '/index.html'));
+  response.render('index.html.ejs');
 });
 
 app.get('/operating_hours', function(request, response) {

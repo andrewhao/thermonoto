@@ -8,19 +8,20 @@ import Debug exposing (..)
 
 -- CONFIG
 type alias Flags =
-  { serverUrl : String
+  { serverUrl : Maybe String
   }
 
 -- MODEL
 type alias Model =
   { startTime : String
   , endTime : String
+  , serverUrl : String
   }
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  ( Model "" ""
-  , getOperatingHoursDetails
+  ( Model "" "" ((Maybe.withDefault "" flags.serverUrl) ++ "/operating_hours")
+  , getOperatingHoursDetails (Model "" "" ((Maybe.withDefault "" flags.serverUrl) ++ "/operating_hours"))
   )
 
 -- UPDATE
@@ -36,16 +37,17 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     RefreshOperatingHours ->
-      (model, getOperatingHoursDetails)
+      (model, getOperatingHoursDetails model)
 
     UpdateOperatingHours ->
       (model, updateOperatingHoursDetails model)
 
     ReceiveOperatingHoursDetails (Ok jsonResponse) ->
       Debug.log (jsonResponse |> toString)
-      ( Model
-         (Maybe.withDefault "" jsonResponse.start_time)
-         (Maybe.withDefault "" jsonResponse.end_time)
+      ( { model |
+            startTime = (Maybe.withDefault "" jsonResponse.start_time),
+            endTime = (Maybe.withDefault "" jsonResponse.end_time)
+        }
       , Cmd.none)
 
     UpdateStartTime newStartTime ->
@@ -62,9 +64,10 @@ update msg model =
 
     ReceiveUpdatedOperatingHoursDetails (Ok jsonResponse) ->
       Debug.log (jsonResponse |> toString)
-      ( Model
-         (Maybe.withDefault "" jsonResponse.start_time)
-         (Maybe.withDefault "" jsonResponse.end_time)
+      ( { model |
+            startTime = (Maybe.withDefault "" jsonResponse.start_time),
+            endTime = (Maybe.withDefault "" jsonResponse.end_time)
+        }
       , Cmd.none)
 
     ReceiveUpdatedOperatingHoursDetails (Err err) ->
@@ -97,19 +100,15 @@ subscriptions model =
 
 updateOperatingHoursDetails : Model -> Cmd Msg
 updateOperatingHoursDetails model =
-  HttpBuilder.put "//thermonoto.herokuapp.com/operating_hours"
+  HttpBuilder.put model.serverUrl
     |> withUrlEncodedBody [ ("start_time", model.startTime)
                           , ("end_time", model.endTime) ]
     |> withExpect (Http.expectJson decodeJsonOperationHoursResponse)
     |> send ReceiveUpdatedOperatingHoursDetails
 
-getOperatingHoursDetails : Cmd Msg
-getOperatingHoursDetails =
-  let
-    url =
-      "//thermonoto.herokuapp.com/operating_hours"
-  in
-    Http.send ReceiveOperatingHoursDetails (Http.get url decodeJsonOperationHoursResponse)
+getOperatingHoursDetails : Model -> Cmd Msg
+getOperatingHoursDetails model =
+  Http.send ReceiveOperatingHoursDetails (Http.get model.serverUrl decodeJsonOperationHoursResponse)
 
 type alias JsonResponse =
   { start_time : Maybe String
