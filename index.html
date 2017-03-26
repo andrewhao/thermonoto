@@ -10,13 +10,14 @@
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <!-- Place favicon.ico in the root directory -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/keen-js/3.4.1/keen.min.js"></script>
-
+        <script src="/app.js"></script>
     </head>
     <body>
         <!--[if lte IE 9]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
         <![endif]-->
         <div id="daily_humidity"></div>
+        <div id="app-root"></div>
 
         <script>
 var client = new Keen({
@@ -44,6 +45,9 @@ Keen.ready(function(){
   });
 
 });
+
+var node = document.getElementById('app-root');
+var app = Elm.Main.embed(node, { serverUrl: "/" });
         </script>
     </body>
 </html>

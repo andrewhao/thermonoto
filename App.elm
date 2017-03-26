@@ -6,14 +6,19 @@ import Http
 import Json.Decode exposing (..)
 import Debug exposing (..)
 
+-- CONFIG
+type alias Flags =
+  { serverUrl : String
+  }
+
 -- MODEL
 type alias Model =
   { startTime : String
   , endTime : String
   }
 
-init : (Model, Cmd Msg)
-init =
+init : Flags -> (Model, Cmd Msg)
+init flags =
   ( Model "" ""
   , getOperatingHoursDetails
   )
@@ -118,7 +123,7 @@ decodeJsonOperationHoursResponse =
     (field "end_time" (maybe string))
 
 main =
-  Html.program
+  Html.programWithFlags
     { init = init
     , view = view
     , update = update

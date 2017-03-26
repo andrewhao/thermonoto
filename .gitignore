@@ -1,5 +1,7 @@
 */config.json
 
+public
+
 # Node build artifacts
 node_modules
 npm-debug.log
