@@ -92,7 +92,7 @@ subscriptions model =
 
 updateOperatingHoursDetails : Model -> Cmd Msg
 updateOperatingHoursDetails model =
-  HttpBuilder.put "//localhost:5000/operating_hours"
+  HttpBuilder.put "//thermonoto.herokuapp.com/operating_hours"
     |> withUrlEncodedBody [ ("start_time", model.startTime)
                           , ("end_time", model.endTime) ]
     |> withExpect (Http.expectJson decodeJsonOperationHoursResponse)
@@ -102,7 +102,7 @@ getOperatingHoursDetails : Cmd Msg
 getOperatingHoursDetails =
   let
     url =
-      "//localhost:5000/operating_hours"
+      "//thermonoto.herokuapp.com/operating_hours"
   in
     Http.send ReceiveOperatingHoursDetails (Http.get url decodeJsonOperationHoursResponse)
 
