@@ -2,7 +2,7 @@
     "name": "Thermonoto",
     "repository": "https://github.com/andrewhao/thermonoto",
     "env": {
-        "ELM_COMPILE": "elm make App.elm --output public/dashboard.html"
+        "ELM_COMPILE": "elm make App.elm --output public/app.js"
     },
     "buildpacks": [
         {
