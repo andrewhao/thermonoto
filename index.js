@@ -10,6 +10,7 @@ var redis = require("redis");
 var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
 var redisClient = redis.createClient(redisUrl);
 var Promise = require('bluebird');
+var Schedule = require('./services/schedule');
 
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
@@ -28,46 +29,42 @@ app.set('view engine', 'ejs');
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 
-function fanManagementEnabled() {
-  // Enable fan management within certain time thresholds.
-  var time = moment().tz('America/Los_Angeles');
-  var START_TIME_HOUR_THRESHOLD = parseInt(process.env.START_TIME_HOUR_THRESHOLD);
-  var END_TIME_HOUR_THRESHOLD = parseInt(process.env.END_TIME_HOUR_THRESHOLD);
-
-  console.log('Current hour is:', time.hour());
-  console.log('Start time: ', START_TIME_HOUR_THRESHOLD);
-  console.log('End time: ', END_TIME_HOUR_THRESHOLD);
-
-  return (time.hour() >= START_TIME_HOUR_THRESHOLD) &&
-    (time.hour() < END_TIME_HOUR_THRESHOLD);
-}
-
 function toggleFan(temp, cb) {
-  if (!fanManagementEnabled()) {
-    console.log("Outside the hours of fan management. Skipping....");
-    return cb(false);
-  }
+  fetchOperatingHours()
+  .then(function(results) {
+    var startTime = results[0];
+    var endTime = results[1];
+    var scheduler = new Schedule(startTime, endTime)
 
-  console.log("toggling fan", temp);
-  if (temp > TEMP_THRESHOLD) {
-    console.log('OVER threshold. Turning on the fan...');
-    request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
-      .on('response', function() { return cb(true) });
-  } else {
-    console.log('UNDER threshold. Turning off the fan...');
-    request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
-    .on('response', function() { return cb(false) });
-  }
+    if (!scheduler.isOn()) {
+      console.log("Outside the hours of fan management. Skipping....");
+      return cb(false);
+    }
+
+    if (temp > TEMP_THRESHOLD) {
+      console.log('OVER threshold. Turning on the fan...');
+      request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
+        .on('response', function() { return cb(true) });
+    } else {
+      console.log('UNDER threshold. Turning off the fan...');
+      request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
+      .on('response', function() { return cb(false) });
+    }
+  });
 };
 
 app.get('/', function(request, response) {
   response.render('index.html.ejs');
 });
 
-app.get('/operating_hours', function(request, response) {
+function fetchOperatingHours() {
   var getStartTime = redisClient.getAsync("start_time");
   var getEndTime = redisClient.getAsync('end_time');
-  Promise.all([getStartTime, getEndTime])
+  return Promise.all([getStartTime, getEndTime]);
+}
+
+app.get('/operating_hours', function(request, response) {
+  fetchOperatingHours()
   .then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
