@@ -4,14 +4,15 @@ var keenIO = require('keen.io');
 var request = require('request');
 var app = express();
 var path = require('path');
-var redis = require("redis");
 
-var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
-var redisClient = redis.createClient(redisUrl);
 var Promise = require('bluebird');
 var Schedule = require('./services/schedule');
 var Thermostat = require('./services/thermostat');
+var fetchOperatingHours = require('./services/fetchOperatingHours')
 
+var redis = require("redis");
+var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
+var redisClient = redis.createClient(redisUrl);
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
 
@@ -30,7 +31,7 @@ app.set('view engine', 'ejs');
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 
 function toggleFan(temp, cb) {
-  fetchOperatingHours()
+  fetchOperatingHours(redisClient)
   .then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
@@ -56,12 +57,6 @@ function toggleFan(temp, cb) {
 app.get('/', function(request, response) {
   response.render('index.html.ejs');
 });
-
-function fetchOperatingHours() {
-  var getStartTime = redisClient.getAsync("start_time");
-  var getEndTime = redisClient.getAsync('end_time');
-  return Promise.all([getStartTime, getEndTime]);
-}
 
 app.get('/operating_hours', function(request, response) {
   fetchOperatingHours()
