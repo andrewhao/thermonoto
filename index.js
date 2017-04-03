@@ -41,15 +41,11 @@ function toggleFan(temp, cb) {
       return cb(false);
     }
 
-    if (temp > TEMP_THRESHOLD) {
-      console.log('OVER threshold. Turning on the fan...');
-      request.get('https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH')
-        .on('response', function() { return cb(true) });
-    } else {
-      console.log('UNDER threshold. Turning off the fan...');
-      request.get('https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH')
-      .on('response', function() { return cb(false) });
-    }
+    var thermostat = new Thermostat(TEMP_THRESHOLD);
+    return thermostat.trigger(temp)
+    .then((isFanOn) => {
+      cb(isFanOn);
+    });
   });
 };
 
