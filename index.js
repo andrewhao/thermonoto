@@ -3,7 +3,6 @@ var bodyParser = require('body-parser');
 var keenIO = require('keen.io');
 var request = require('request');
 var app = express();
-var moment = require('moment-timezone');
 var path = require('path');
 var redis = require("redis");
 
@@ -45,6 +44,10 @@ function toggleFan(temp, cb) {
     thermostat.trigger(temp)
     .then((isFanOn) => {
       return cb(isFanOn);
+    })
+    .catch((err) => {
+      console.error(err);
+      cb(false);
     });
   });
 };
