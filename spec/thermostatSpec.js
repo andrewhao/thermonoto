@@ -1,4 +1,4 @@
-var Thermostat = require('../services/Thermostat');
+var Thermostat = require('../services/thermostat');
 var sinon = require('sinon');
 var Promise = require('bluebird');
 var expect = require('chai').expect;

@@ -42,9 +42,9 @@ function toggleFan(temp, cb) {
     }
 
     var thermostat = new Thermostat(TEMP_THRESHOLD);
-    return thermostat.trigger(temp)
+    thermostat.trigger(temp)
     .then((isFanOn) => {
-      cb(isFanOn);
+      return cb(isFanOn);
     });
   });
 };
