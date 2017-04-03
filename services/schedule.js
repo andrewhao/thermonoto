@@ -11,7 +11,7 @@ Schedule.prototype.isOn = function(currentTime) {
   } else {
     this.currentTime = currentTime;
   }
-  console.log('currentTime', currentTime);
+  console.log('currentTime', this.currentTime);
   var hours = this.currentTime.getHours();
 
   var startHours = this.startTime.getHours();
