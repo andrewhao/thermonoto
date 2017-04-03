@@ -10,6 +10,7 @@ var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
 var redisClient = redis.createClient(redisUrl);
 var Promise = require('bluebird');
 var Schedule = require('./services/schedule');
+var Thermostat = require('./services/thermostat');
 
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
