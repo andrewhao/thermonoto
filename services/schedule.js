@@ -8,12 +8,12 @@ function Schedule(startTime, endTime) {
 
 Schedule.prototype.isOn = function(currentTime) {
   if(currentTime === undefined) {
-    this.currentTime = moment().toDate();
+    this.currentTime = moment();
   } else {
-    this.currentTime = currentTime;
+    this.currentTime = moment(currentTime);
   }
-  console.log('currentTime', this.currentTime);
-  var hours = this.currentTime.getHours();
+  console.log('currentTime', this.currentTime.format());
+  var hours = this.currentTime.hours();
 
   var startHours = this.startTime.getHours();
   var endHours = this.endTime.getHours();
