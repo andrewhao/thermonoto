@@ -51,7 +51,7 @@ function toggleFan(temp) {
     return thermostat.trigger(temp)
     .catch((err) => {
       console.error(err);
-      cb(false);
+      return Promise.resolve(false);
     });
   });
 };
