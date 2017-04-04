@@ -1,4 +1,5 @@
 var moment = require('moment-timezone');
+moment.tz.setDefault('America/Los_Angeles');
 
 function Schedule(startTime, endTime) {
   this.startTime = new Date('2016-01-01 ' + startTime);
@@ -7,7 +8,7 @@ function Schedule(startTime, endTime) {
 
 Schedule.prototype.isOn = function(currentTime) {
   if(currentTime === undefined) {
-    this.currentTime = moment().tz('America/Los_Angeles').toDate();
+    this.currentTime = moment().toDate();
   } else {
     this.currentTime = currentTime;
   }
