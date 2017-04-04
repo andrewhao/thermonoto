@@ -35,7 +35,7 @@ var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 var theSwitch = new Switch();
 
 function toggleFan(temp) {
-  fetchOperatingHours(redisClient)
+  return fetchOperatingHours(redisClient)
   .then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
