@@ -60,7 +60,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/operating_hours', function(request, response) {
-  fetchOperatingHours()
+  fetchOperatingHours(redisClient)
   .then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
