@@ -10,7 +10,7 @@ Schedule.prototype.isOn = function(currentTime) {
   if(currentTime === undefined) {
     this.currentTime = moment();
   } else {
-    this.currentTime = moment(currentTime);
+    this.currentTime = currentTime;
   }
   console.log('currentTime', this.currentTime.format());
   var hours = this.currentTime.hours();
