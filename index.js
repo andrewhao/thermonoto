@@ -9,6 +9,7 @@ var moment = require('moment-timezone');
 var Promise = require('bluebird');
 var Schedule = require('./services/schedule');
 var Thermostat = require('./services/thermostat');
+var Switch = require('./services/switch');
 var fetchOperatingHours = require('./services/fetchOperatingHours')
 
 var redis = require("redis");
@@ -31,8 +32,9 @@ app.set('view engine', 'ejs');
 
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
+var theSwitch = new Switch();
 
-function toggleFan(temp, cb) {
+function toggleFan(temp) {
   fetchOperatingHours(redisClient)
   .then(function(results) {
     var startTime = results[0];
@@ -41,14 +43,12 @@ function toggleFan(temp, cb) {
 
     if (!scheduler.isOn()) {
       console.log("Outside the hours of fan management. Skipping....");
-      return cb(false);
+      return theSwitch.flipOff()
+      .then(() => false)
     }
 
     var thermostat = new Thermostat(TEMP_THRESHOLD);
-    thermostat.trigger(temp)
-    .then((isFanOn) => {
-      return cb(isFanOn);
-    })
+    return thermostat.trigger(temp)
     .catch((err) => {
       console.error(err);
       cb(false);
@@ -97,7 +97,8 @@ app.post('/temperature_updates', function(request, response) {
   var temperature = parseFloat(request.body.temperature);
   var humidity = parseFloat(request.body.humidity);
 
-  toggleFan(humidity, function(isFanOn) {
+  toggleFan(humidity)
+  .then(function(isFanOn) {
     keen.addEvent("temperature_updates", {
       temperature: temperature,
       humidity: humidity,
