@@ -4,6 +4,7 @@ var keenIO = require('keen.io');
 var request = require('request');
 var app = express();
 var path = require('path');
+var moment = require('moment-timezone');
 
 var Promise = require('bluebird');
 var Schedule = require('./services/schedule');
