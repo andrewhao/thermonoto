@@ -11,10 +11,11 @@ var Thermostat = require('./services/thermostat');
 var fetchOperatingHours = require('./services/fetchOperatingHours')
 
 var redis = require("redis");
-var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
-var redisClient = redis.createClient(redisUrl);
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
+
+var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
+var redisClient = redis.createClient(redisUrl);
 
 keen = keenIO.configure({
   projectId: process.env.KEEN_PROJECT_ID,
