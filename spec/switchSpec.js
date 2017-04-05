@@ -3,13 +3,10 @@ var sinon = require('sinon');
 var Switch = require('../services/switch');
 
 describe('Switch', () => {
-  var requestLib = sinon.stub().returns(Promise.resolve());
-  var subject = new Switch(requestLib);
   describe('#flipOn', () => {
-    var threshold = 80;
-
-    it('when above threshold makes an HTTP request', (done) => {
-      var currentTemperature = 81;
+    var requestLib = sinon.stub().returns(Promise.resolve());
+    var subject = new Switch(requestLib);
+    it('makes an HTTP request', (done) => {
       subject.flipOn()
         .then((result) => {
           expect(requestLib.calledWith(
@@ -19,10 +16,27 @@ describe('Switch', () => {
           done()
         });
     });
+
+    describe('when switch is disabled', () => {
+      it('does not fire a request', (done) => {
+        var requestLib = sinon.stub().returns(Promise.resolve());
+        var subject = new Switch(requestLib, false);
+        subject.flipOn()
+        .then((result) => {
+          expect(requestLib.calledWith(
+            'https://maker.ifttt.com/trigger/too_hot/with/key/cYteZfZjX6aUMIR4dKoCFH'
+          )).to.eq(false)
+          expect(result).to.eq(false);
+          done()
+        });
+      });
+    });
   });
 
   describe('#flipOff', () => {
-    it('when below threshold makes an HTTP request', (done) => {
+    it('makes an HTTP request', (done) => {
+      var requestLib = sinon.stub().returns(Promise.resolve());
+      var subject = new Switch(requestLib);
       subject.flipOff()
         .then((result) => {
           expect(requestLib.calledWith(
@@ -31,6 +45,21 @@ describe('Switch', () => {
           expect(result).to.eq(false);
           done()
         });
+    });
+
+    describe('when switch is disabled', () => {
+      it('does not fire a request', (done) => {
+        var requestLib = sinon.stub().returns(Promise.resolve());
+        var subject = new Switch(requestLib, false);
+        subject.flipOff()
+        .then((result) => {
+          expect(requestLib.calledWith(
+            'https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aUMIR4dKoCFH'
+          )).to.eq(false)
+          expect(result).to.eq(false);
+          done()
+        });
+      });
     });
   });
 });

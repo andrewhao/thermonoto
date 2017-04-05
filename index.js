@@ -32,7 +32,7 @@ app.set('view engine', 'ejs');
 
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
-var theSwitch = new Switch();
+var theSwitch = new Switch(undefined, false);
 
 function toggleFan(temp) {
   return fetchOperatingHours(redisClient)
