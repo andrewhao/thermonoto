@@ -47,7 +47,7 @@ function toggleFan(temp) {
       .then(() => false)
     }
 
-    var thermostat = new Thermostat(TEMP_THRESHOLD);
+    var thermostat = new Thermostat(TEMP_THRESHOLD, theSwitch);
     return thermostat.trigger(temp)
     .catch((err) => {
       console.error(err);
