@@ -1,3 +1,5 @@
+module App exposing (..)
+
 import Html exposing (..)
 import HttpBuilder exposing (..)
 import Html.Attributes exposing (..)
@@ -18,10 +20,14 @@ type alias Model =
   , serverUrl : String
   }
 
+theServerUrl : Flags -> String
+theServerUrl flags =
+  (Maybe.withDefault "" flags.serverUrl) ++ "/operating_hours"
+
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  ( Model "" "" ((Maybe.withDefault "" flags.serverUrl) ++ "/operating_hours")
-  , getOperatingHoursDetails (Model "" "" ((Maybe.withDefault "" flags.serverUrl) ++ "/operating_hours"))
+  ( Model "" "" (theServerUrl flags)
+  , getOperatingHoursDetails (Model "" "" (theServerUrl flags))
   )
 
 -- UPDATE

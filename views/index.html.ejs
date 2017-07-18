@@ -47,7 +47,7 @@ Keen.ready(function(){
 });
 
 var node = document.getElementById('app-root');
-var app = Elm.Main.embed(node, { serverUrl: "<%= process.env.CANONICAL_URL %>" });
+var app = Elm.App.embed(node, { serverUrl: "<%= process.env.CANONICAL_URL %>" });
         </script>
     </body>
 </html>

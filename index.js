@@ -11,6 +11,7 @@ var Schedule = require('./services/schedule');
 var Thermostat = require('./services/thermostat');
 var Switch = require('./services/switch');
 var fetchOperatingHours = require('./services/fetchOperatingHours')
+var cors = require('cors');
 
 var redis = require("redis");
 Promise.promisifyAll(redis.RedisClient.prototype);
@@ -27,6 +28,7 @@ keen = keenIO.configure({
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static('public'))
+app.use(cors())
 
 app.set('view engine', 'ejs');
 
