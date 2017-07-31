@@ -16,6 +16,7 @@
         <!--[if lte IE 9]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
         <![endif]-->
+        <div id="current_temperature"></div>
         <div id="daily_humidity"></div>
         <div id="app-root"></div>
 
@@ -42,6 +43,25 @@ Keen.ready(function(){
     title: "Last Day Humidity",
     height: window.innerHeight,
     vAxis: { gridLines: 12 }
+  });
+
+
+  var query2 = new Keen.Query("average", {
+    event_collection: "temperature_updates",
+    filters: [
+    {
+        "operator": "eq",
+        "property_name": "device_id",
+        "property_value": "rpi2"
+    }
+],
+    target_property: "temperature",
+    timeframe: "this_20_minutes",
+    timezone: "US/Pacific"
+  });
+  
+  client.draw(query2, document.getElementById("current_temperature"), {
+    title: "Current Temperature (RPi2)",
   });
 
 });
