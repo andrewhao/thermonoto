@@ -17,6 +17,8 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
         <![endif]-->
         <div id="current_temperature"></div>
+        <div id="current_humidity"></div>
+        <div id="daily_temperature"></div>
         <div id="daily_humidity"></div>
         <div id="app-root"></div>
 
@@ -39,12 +41,28 @@ Keen.ready(function(){
     timezone: "US/Pacific"
   });
 
+  var dailyTemperatureQuery = new Keen.Query("average", {
+    event_collection: "temperature_updates",
+    group_by: [
+    "device_id"
+],
+    interval: "hourly",
+    target_property: "temperature",
+    timeframe: "this_24_hours",
+    timezone: "US/Pacific"
+  });
+
   client.draw(query, document.getElementById("daily_humidity"), {
     title: "Last Day Humidity",
     height: window.innerHeight,
     vAxis: { gridLines: 12 }
   });
 
+  client.draw(query, document.getElementById("daily_temperature"), {
+    title: "Last Day Temperature",
+    height: window.innerHeight,
+    vAxis: { gridLines: 12 }
+  });
 
   var query2 = new Keen.Query("average", {
     event_collection: "temperature_updates",
@@ -62,6 +80,25 @@ Keen.ready(function(){
   
   client.draw(query2, document.getElementById("current_temperature"), {
     title: "Current Temperature (RPi2)",
+  });
+
+
+  var query3 = new Keen.Query("average", {
+    event_collection: "temperature_updates",
+    filters: [
+    {
+        "operator": "eq",
+        "property_name": "device_id",
+        "property_value": "rpi2"
+    }
+],
+    target_property: "humidity",
+    timeframe: "this_20_minutes",
+    timezone: "US/Pacific"
+  });
+  
+  client.draw(query3, document.getElementById("current_humidity"), {
+    title: "Current Humidity (RPi2)",
   });
 
 });
