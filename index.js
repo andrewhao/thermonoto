@@ -92,6 +92,26 @@ app.get('/temperature_updates', function(request, response) {
   response.sendStatus(200);
 });
 
+app.post('/ambient_noise_updates', function(request, response) {
+  console.log(request.body);
+  var rmsAverage = parseFloat(request.body.rms_average);
+
+  keen.addEvent("ambient_noise_updates", {
+    rms_average: rms_average,
+    device_id: request.body.device_id,
+    receivedAt: new Date()
+  }, function(err, res) {
+    if(err) {
+      console.error("Error updating Keen", err);
+      throw "Error updating Keen.";
+    }
+    else {
+      console.log('successfully logged to Keen');
+      response.sendStatus(200);
+    }
+  });
+});
+
 app.post('/temperature_updates', function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
