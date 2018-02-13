@@ -94,10 +94,17 @@ app.get('/temperature_updates', function(request, response) {
 
 app.post('/ambient_noise_updates', function(request, response) {
   console.log(request.body);
-  var rmsAverage = parseFloat(request.body.rms_average);
+  // {'pk_lev_db': '-48.51', 'rms_tr_db': '-79.41', 'rms_pk_db': '-61.28', 'rms_lev_db': '-75.40'}
+  var rms_tr_db = parseFloat(request.body.rms_tr_db);
+  var rms_pk_db = parseFloat(request.body.rms_pk_db);
+  var rms_lev_db = parseFloat(request.body.rms_lev_db);
+  var pk_lev_db = parseFloat(request.body.pk_lev_db);
 
   keen.addEvent("ambient_noise_updates", {
-    rms_average: rmsAverage,
+    rms_tr_db: rms_tr_db,
+    rms_pk_db: rms_pk_db,
+    rms_lev_db: rms_lev_db,
+    pk_lev_db: pk_lev_db,
     device_id: request.body.device_id,
     receivedAt: new Date()
   }, function(err, res) {
