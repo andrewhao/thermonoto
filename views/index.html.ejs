@@ -20,6 +20,7 @@
         <div id="current_humidity"></div>
         <div id="daily_temperature"></div>
         <div id="daily_humidity"></div>
+        <div id="ambient_noise"></div>
         <div id="app-root"></div>
 
         <script>
@@ -39,6 +40,20 @@ Keen.ready(function(){
     target_property: "humidity",
     timeframe: "this_24_hours",
     timezone: "US/Pacific"
+  });
+
+  var ambientNoiseQuery = new Keen.Query("average", {
+    event_collection: "ambient_noise_updates",
+    interval: "minutely",
+    target_property: "rms_lev_db",
+    timeframe: "this_24_hours",
+    timezone: "US/Pacific"
+  });
+
+  client.draw(ambientNoiseQuery, document.getElementById("ambient_noise"), {
+    title: "Last Day Noise",
+    height: window.innerHeight,
+    vAxis: { gridLines: 12 }
   });
 
   var dailyTemperatureQuery = new Keen.Query("average", {
