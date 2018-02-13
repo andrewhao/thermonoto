@@ -97,7 +97,7 @@ app.post('/ambient_noise_updates', function(request, response) {
   var rmsAverage = parseFloat(request.body.rms_average);
 
   keen.addEvent("ambient_noise_updates", {
-    rms_average: rms_average,
+    rms_average: rmsAverage,
     device_id: request.body.device_id,
     receivedAt: new Date()
   }, function(err, res) {
