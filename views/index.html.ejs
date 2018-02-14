@@ -14,6 +14,8 @@
 
   <link href="https://d26b395fwzu5fz.cloudfront.net/4.3.0/keen.min.css" rel="stylesheet" />
   <script src="https://d26b395fwzu5fz.cloudfront.net/4.3.0/keen.min.js"></script>
+  <script src="https://unpkg.com/rxjs@5.5.6/bundles/Rx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js"></script>
   <script src="/app.js"></script>
 </head>
 
@@ -58,7 +60,7 @@
         event_collection: "ambient_noise_updates",
         interval: "minutely",
         target_property: "rms_lev_db",
-        timeframe: "this_240_minutes",
+        timeframe: "this_600_minutes",
         timezone: "US/Pacific"
       });
 
@@ -66,7 +68,7 @@
         event_collection: "ambient_noise_updates",
         interval: "minutely",
         target_property: "rms_tr_db",
-        timeframe: "this_240_minutes",
+        timeframe: "this_600_minutes",
         timezone: "US/Pacific"
       });
 
@@ -74,7 +76,7 @@
         event_collection: "ambient_noise_updates",
         interval: "minutely",
         target_property: "rms_pk_db",
-        timeframe: "this_240_minutes",
+        timeframe: "this_600_minutes",
         timezone: "US/Pacific"
       });
 
@@ -83,24 +85,51 @@
           var result1 = res[0].result  // data from first query
           var result2 = res[1].result  // data from second query
           var result3 = res[2].result  // data from third query
-          var data = []  // place for combined results
-          var i = 0;
-          while (i < result1.length) {
-            data[i] = {
-              // format the data so it can be charted
-              timeframe: result1[i]["timeframe"],
-              value: [
-                { category: "Average (dB)", result: result1[i]["value"] },
-                { category: "Trough (dB)", result: result2[i]["value"] },
-                { category: "Peak (dB)", result: result3[i]["value"] }
-              ]
-            };
-            if (i == result1.length - 1) {
+          var data = _.chain(_.zip(result1, result2, result3))
+            .map(function (value) {
+              return {
+                timeframe: value[0]["timeframe"],
+                value: [
+                  { category: "Average (dB)", result: value[0]["value"] },
+                  { category: "Trough (dB)", result: value[1]["value"] },
+                  { category: "Peak (dB)", result: value[2]["value"] }
+                ]
+              }
+            })
+            .value()
+
+          var data$ = Rx.Observable.from(data)
+            .bufferCount(5, 4)
+            .map(function (aggregateReportGroup) {
+              var reportValues = _.map(aggregateReportGroup, 'value');
+              var sum1 = _.chain(reportValues)
+                .map(function (reportValue) { return reportValue[0].result })
+                .mean()
+                .value()
+              var sum2 = _.chain(reportValues)
+                .map(function (reportValue) { return reportValue[1].result })
+                .mean()
+                .value()
+              var sum3 = _.chain(reportValues)
+                .map(function (reportValue) { return reportValue[2].result })
+                .mean()
+                .value()
+              return {
+                timeframe: _.first(aggregateReportGroup).timeframe,
+                value: [
+                  { category: "Average (dB)", result: sum1 },
+                  { category: "Trough (dB)", result: sum2 },
+                  { category: "Peak (dB)", result: sum3 }
+                ]
+              }
+            })
+            .toArray()
+            .subscribe(function (result) {
               // chart the data
-              ambientNoiseChart.parseRawData({ result: data }).render();
-            }
-            i++;
-          }
+              result = _.dropRight(result, 2)
+              ambientNoiseChart.parseRawData({ result: result }).render();
+            });
+
         })
 
       var dailyTemperatureQuery = new Keen.Query("average", {
