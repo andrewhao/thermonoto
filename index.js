@@ -132,7 +132,7 @@ app.post("/cry_detection_updates", function(request, response) {
       is_crying: isCrying,
       receivedAt: receivedAt,
       score: score,
-      human_string: human_string
+      human_string: humanString
     },
     function(err, res) {
       if (err) {
