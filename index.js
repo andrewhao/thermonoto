@@ -1,22 +1,22 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var keenIO = require('keen.io');
-var request = require('request');
+var express = require("express");
+var bodyParser = require("body-parser");
+var keenIO = require("keen.io");
+var request = require("request");
 var app = express();
-var path = require('path');
-var moment = require('moment-timezone');
+var path = require("path");
+var moment = require("moment-timezone");
 
-var Promise = require('bluebird');
-var Schedule = require('./services/schedule');
-var Thermostat = require('./services/thermostat');
-var Switch = require('./services/switch');
-var fetchOperatingHours = require('./services/fetchOperatingHours')
+var Promise = require("bluebird");
+var Schedule = require("./services/schedule");
+var Thermostat = require("./services/thermostat");
+var Switch = require("./services/switch");
+var fetchOperatingHours = require("./services/fetchOperatingHours");
 
 var redis = require("redis");
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
 
-var redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
+var redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 var redisClient = redis.createClient(redisUrl);
 
 keen = keenIO.configure({
@@ -24,45 +24,41 @@ keen = keenIO.configure({
   writeKey: process.env.KEEN_WRITE_KEY
 });
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.set('port', (process.env.PORT || 5000));
-app.use(express.static('public'))
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set("port", process.env.PORT || 5000);
+app.use(express.static("public"));
 
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 
 // Only auto-turn on the fan if it's hotter than 74 degrees.
 var TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 74.0;
 var theSwitch = new Switch(undefined, false);
 
 function toggleFan(temp) {
-  return fetchOperatingHours(redisClient)
-  .then(function(results) {
+  return fetchOperatingHours(redisClient).then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
-    var scheduler = new Schedule(startTime, endTime)
+    var scheduler = new Schedule(startTime, endTime);
 
     if (!scheduler.isOn()) {
       console.log("Outside the hours of fan management. Skipping....");
-      return theSwitch.flipOff()
-      .then(() => false)
+      return theSwitch.flipOff().then(() => false);
     }
 
     var thermostat = new Thermostat(TEMP_THRESHOLD, theSwitch);
-    return thermostat.trigger(temp)
-    .catch((err) => {
+    return thermostat.trigger(temp).catch(err => {
       console.error(err);
       return Promise.resolve(false);
     });
   });
-};
+}
 
-app.get('/', function(request, response) {
-  response.render('index.html.ejs');
+app.get("/", function(request, response) {
+  response.render("index.html.ejs");
 });
 
-app.get('/operating_hours', function(request, response) {
-  fetchOperatingHours(redisClient)
-  .then(function(results) {
+app.get("/operating_hours", function(request, response) {
+  fetchOperatingHours(redisClient).then(function(results) {
     var startTime = results[0];
     var endTime = results[1];
     var hours = {
@@ -73,26 +69,27 @@ app.get('/operating_hours', function(request, response) {
   });
 });
 
-app.put('/operating_hours', function(request, response) {
+app.put("/operating_hours", function(request, response) {
   console.log(request.body);
   var hours = {
     start_time: request.body.start_time,
     end_time: request.body.end_time
   };
-  redisClient.setAsync("start_time", hours.start_time)
-  .then(function() {
-    return redisClient.setAsync("end_time", hours.end_time);
-  })
-  .then(function() {
-    response.json(hours);
-  });
+  redisClient
+    .setAsync("start_time", hours.start_time)
+    .then(function() {
+      return redisClient.setAsync("end_time", hours.end_time);
+    })
+    .then(function() {
+      response.json(hours);
+    });
 });
 
-app.get('/temperature_updates', function(request, response) {
+app.get("/temperature_updates", function(request, response) {
   response.sendStatus(200);
 });
 
-app.post('/ambient_noise_updates', function(request, response) {
+app.post("/ambient_noise_updates", function(request, response) {
   console.log(request.body);
   // {'pk_lev_db': '-48.51', 'rms_tr_db': '-79.41', 'rms_pk_db': '-61.28', 'rms_lev_db': '-75.40'}
   var rms_tr_db = parseFloat(request.body.rms_tr_db);
@@ -100,51 +97,79 @@ app.post('/ambient_noise_updates', function(request, response) {
   var rms_lev_db = parseFloat(request.body.rms_lev_db);
   var pk_lev_db = parseFloat(request.body.pk_lev_db);
 
-  keen.addEvent("ambient_noise_updates", {
-    rms_tr_db: rms_tr_db,
-    rms_pk_db: rms_pk_db,
-    rms_lev_db: rms_lev_db,
-    pk_lev_db: pk_lev_db,
-    device_id: request.body.device_id,
-    receivedAt: new Date()
-  }, function(err, res) {
-    if(err) {
-      console.error("Error updating Keen", err);
-      throw "Error updating Keen.";
+  keen.addEvent(
+    "ambient_noise_updates",
+    {
+      rms_tr_db: rms_tr_db,
+      rms_pk_db: rms_pk_db,
+      rms_lev_db: rms_lev_db,
+      pk_lev_db: pk_lev_db,
+      device_id: request.body.device_id,
+      receivedAt: new Date()
+    },
+    function(err, res) {
+      if (err) {
+        console.error("Error updating Keen", err);
+        throw "Error updating Keen.";
+      } else {
+        console.log("successfully logged to Keen");
+        response.sendStatus(200);
+      }
     }
-    else {
-      console.log('successfully logged to Keen');
-      response.sendStatus(200);
-    }
-  });
+  );
 });
 
-app.post('/temperature_updates', function(request, response) {
+app.post("/cry_detection_updates", function(request, response) {
+  console.log(request.body);
+  var isCrying = request.body.is_crying;
+  var receivedAt = moment.tz(request.body.received_at, "Etc/UTC");
+
+  keen.addEvent(
+    "cry_detection_updates",
+    {
+      is_crying: isCrying,
+      receivedAt: receivedAt
+    },
+    function(err, res) {
+      if (err) {
+        console.error("Error updating Keen", err);
+        throw "Error updating Keen.";
+      } else {
+        console.log("successfully logged to Keen");
+        response.sendStatus(200);
+      }
+    }
+  );
+});
+
+app.post("/temperature_updates", function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
   var humidity = parseFloat(request.body.humidity);
 
-  toggleFan(humidity)
-  .then(function(isFanOn) {
-    keen.addEvent("temperature_updates", {
-      temperature: temperature,
-      humidity: humidity,
-      isFanOn: isFanOn,
-      device_id: request.body.device_id,
-      receivedAt: new Date()
-    }, function(err, res) {
-      if(err) {
-        console.error("Error updating Keen", err);
-        throw "Error updating Keen.";
+  toggleFan(humidity).then(function(isFanOn) {
+    keen.addEvent(
+      "temperature_updates",
+      {
+        temperature: temperature,
+        humidity: humidity,
+        isFanOn: isFanOn,
+        device_id: request.body.device_id,
+        receivedAt: new Date()
+      },
+      function(err, res) {
+        if (err) {
+          console.error("Error updating Keen", err);
+          throw "Error updating Keen.";
+        } else {
+          console.log("successfully logged to Keen");
+          response.sendStatus(200);
+        }
       }
-      else {
-        console.log('successfully logged to Keen');
-        response.sendStatus(200);
-      }
-    });
+    );
   });
 });
 
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+app.listen(app.get("port"), function() {
+  console.log("Node app is running on port", app.get("port"));
 });
