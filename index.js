@@ -121,14 +121,18 @@ app.post("/ambient_noise_updates", function(request, response) {
 
 app.post("/cry_detection_updates", function(request, response) {
   console.log(request.body);
-  var isCrying = request.body.is_crying;
+  var isCrying = parseInt(request.body.is_crying);
+  var score = parseFloat(request.body.score);
+  var humanString = request.body.human_string;
   var receivedAt = moment.tz(request.body.received_at, "Etc/UTC");
 
   keen.addEvent(
     "cry_detection_updates",
     {
       is_crying: isCrying,
-      receivedAt: receivedAt
+      receivedAt: receivedAt,
+      score: score,
+      human_string: human_string
     },
     function(err, res) {
       if (err) {
