@@ -30,6 +30,7 @@
   <div id="daily_temperature"></div>
   <div id="daily_humidity"></div>
   <div id="ambient_noise"></div>
+  <div id="cry_detection"></div>
   <div id="app-root"></div>
 
   <script>
@@ -80,6 +81,20 @@
         target_property: "rms_pk_db",
         timeframe: "this_600_minutes",
         timezone: "US/Pacific"
+      });
+
+      var cryDetectionQuery = new Keen.Query("count_unique", {
+        event_collection: "cry_detection_updates",
+        filters: [{"operator":"exists","property_name":"human_string","property_value":true}],
+        group_by: ["human_string"],
+        interval: "minutely",
+        target_property: "human_string",
+        timeframe: "this_12_hours",
+        timezone: "US/Pacific"
+      })
+
+      client.draw(cryDetectionQuery, document.getElementById("cry_detection"), {
+        title: "Cry Detection",
       });
 
       client.run([ambientNoiseQuery, ambientNoiseTroughQuery, ambientNoisePeakQuery])
