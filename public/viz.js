@@ -23,7 +23,7 @@ Keen.ready(function() {
 
   var cryDetectionChart = new Keen.Dataviz()
     .el("#cry_detection")
-    .height(window.innerHeight)
+    .height(window.innerHeight/2)
     .title("Cry Detection")
     .type("area-step")
     .colorMapping({
@@ -72,9 +72,28 @@ Keen.ready(function() {
     timezone: "US/Pacific"
   });
 
-  client.run(cryDetectionQuery).then(function(res) {
-    cryDetectionChart.data(res).render();
+  var cryAccuracyQuery = new Keen.Query("average", {
+    event_collection: "cry_detection_updates",
+    filters: [
+      {
+        operator: "exists",
+        property_name: "human_string",
+        property_value: true
+      }
+    ],
+    interval: "minutely",
+    target_property: "score",
+    timeframe: "this_600_minutes",
+    timezone: "US/Pacific"
   });
+
+  client
+    .run([cryDetectionQuery, cryAccuracyQuery])
+    .then(function([detectionResult, accuracyResult]) {
+      cryDetectionChart
+        .data(detectionResult)
+        .render();
+    });
 
   client
     .run([ambientNoiseQuery, ambientNoiseTroughQuery, ambientNoisePeakQuery])
