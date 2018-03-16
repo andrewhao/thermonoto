@@ -101,6 +101,7 @@
             .value()
 
           var data$ = Rx.Observable.from(data)
+            .filter(function(d) { return d.value[0].result !== null })
             .bufferCount(5, 4)
             .map(function (aggregateReportGroup) {
               var reportValues = _.map(aggregateReportGroup, 'value');
