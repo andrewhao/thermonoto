@@ -23,7 +23,7 @@ Keen.ready(function() {
 
   var cryDetectionChart = new Keen.Dataviz()
     .el("#cry_detection")
-    .height(window.innerHeight/2)
+    .height(window.innerHeight / 2)
     .title("Cry Detection")
     .type("area-step")
     .colorMapping({
@@ -87,76 +87,81 @@ Keen.ready(function() {
     timezone: "US/Pacific"
   });
 
-  client
-    .run([cryDetectionQuery, cryAccuracyQuery])
-    .then(function([detectionResult, accuracyResult]) {
-      cryDetectionChart
-        .data(detectionResult)
-        .render();
+  const queryAndRenderCryDetection = function() {
+    client.run(cryDetectionQuery).then(function(detectionResult) {
+      cryDetectionChart.data(detectionResult).render();
     });
+  };
 
-  client
-    .run([ambientNoiseQuery, ambientNoiseTroughQuery, ambientNoisePeakQuery])
-    .then(function(res) {
-      var result1 = res[0].result; // data from first query
-      var result2 = res[1].result; // data from second query
-      var result3 = res[2].result; // data from third query
-      var data = _.chain(_.zip(result1, result2, result3))
-        .map(function(value) {
-          return {
-            timeframe: value[0]["timeframe"],
-            value: [
-              { category: "Average (dB)", result: value[0]["value"] },
-              { category: "Trough (dB)", result: value[1]["value"] },
-              { category: "Peak (dB)", result: value[2]["value"] }
-            ]
-          };
-        })
-        .value();
+  queryAndRenderCryDetection();
+  setInterval(queryAndRenderCryDetection, 60000);
 
-      var data$ = Rx.Observable.from(data)
-        .filter(function(d) {
-          return d.value[0].result !== null;
-        })
-        .bufferCount(5, 4)
-        .map(function(aggregateReportGroup) {
-          var reportValues = _.map(aggregateReportGroup, "value");
-          var sum1 = _.chain(reportValues)
-            .map(function(reportValue) {
-              return reportValue[0].result;
-            })
-            .mean()
-            .value();
-          var sum2 = _.chain(reportValues)
-            .map(function(reportValue) {
-              return reportValue[1].result;
-            })
-            .mean()
-            .value();
-          var sum3 = _.chain(reportValues)
-            .map(function(reportValue) {
-              return reportValue[2].result;
-            })
-            .mean()
-            .value();
-          return {
-            timeframe: _.first(aggregateReportGroup).timeframe,
-            value: [
-              { category: "Average (dB)", result: sum1 },
-              { category: "Trough (dB)", result: sum2 },
-              { category: "Peak (dB)", result: sum3 }
-            ]
-          };
+  const queryAndRenderAmbientNoiseQueries = function() {
+    client
+      .run([ambientNoiseQuery, ambientNoiseTroughQuery, ambientNoisePeakQuery])
+      .then(function(res) {
+        var result1 = res[0].result; // data from first query
+        var result2 = res[1].result; // data from second query
+        var result3 = res[2].result; // data from third query
+        var data = _.chain(_.zip(result1, result2, result3))
+          .map(function(value) {
+            return {
+              timeframe: value[0]["timeframe"],
+              value: [
+                { category: "Average (dB)", result: value[0]["value"] },
+                { category: "Trough (dB)", result: value[1]["value"] },
+                { category: "Peak (dB)", result: value[2]["value"] }
+              ]
+            };
+          })
+          .value();
+
+        var data$ = Rx.Observable.from(data)
+          .filter(function(d) {
+            return d.value[0].result !== null;
+          })
+          .bufferCount(5, 4)
+          .map(function(aggregateReportGroup) {
+            var reportValues = _.map(aggregateReportGroup, "value");
+            var sum1 = _.chain(reportValues)
+              .map(function(reportValue) {
+                return reportValue[0].result;
+              })
+              .mean()
+              .value();
+            var sum2 = _.chain(reportValues)
+              .map(function(reportValue) {
+                return reportValue[1].result;
+              })
+              .mean()
+              .value();
+            var sum3 = _.chain(reportValues)
+              .map(function(reportValue) {
+                return reportValue[2].result;
+              })
+              .mean()
+              .value();
+            return {
+              timeframe: _.first(aggregateReportGroup).timeframe,
+              value: [
+                { category: "Average (dB)", result: sum1 },
+                { category: "Trough (dB)", result: sum2 },
+                { category: "Peak (dB)", result: sum3 }
+              ]
+            };
+          });
+        var result$ = data$.toArray().subscribe(function(result) {
+          // chart the data
+          result = _.dropRight(result, 2);
+          ambientNoiseChart.parseRawData({ result: result }).render();
         });
-      var result$ = data$.toArray().subscribe(function(result) {
-        // chart the data
-        result = _.dropRight(result, 2);
-        ambientNoiseChart.parseRawData({ result: result }).render();
+        var firstData$ = data$.take(1).subscribe(function(result) {
+          console.log(result);
+        });
       });
-      var firstData$ = data$.take(1).subscribe(function(result) {
-        console.log(result);
-      });
-    });
+  };
+  queryAndRenderAmbientNoiseQueries();
+  setInterval(queryAndRenderAmbientNoiseQueries, 60000);
 
   var dailyTemperatureQuery = new Keen.Query("average", {
     event_collection: "temperature_updates",
@@ -224,5 +229,3 @@ var node = document.getElementById("app-root");
 var app = Elm.App.embed(node, {
   serverUrl: "<%= process.env.CANONICAL_URL %>"
 });
-
-setInterval(function() { window.location.reload(); }, 60000)
