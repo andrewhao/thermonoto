@@ -105,7 +105,6 @@ app.post("/ambient_noise_updates", function(request, response) {
       rms_lev_db: rms_lev_db,
       pk_lev_db: pk_lev_db,
       device_id: request.body.device_id,
-      receivedAt: new Date()
     },
     function(err, res) {
       if (err) {
@@ -130,7 +129,9 @@ app.post("/cry_detection_updates", function(request, response) {
     "cry_detection_updates",
     {
       is_crying: isCrying,
-      receivedAt: receivedAt,
+      keen: {
+        timestamp: receivedAt
+      },
       score: score,
       human_string: humanString
     },
@@ -159,7 +160,6 @@ app.post("/temperature_updates", function(request, response) {
         humidity: humidity,
         isFanOn: isFanOn,
         device_id: request.body.device_id,
-        receivedAt: new Date()
       },
       function(err, res) {
         if (err) {
