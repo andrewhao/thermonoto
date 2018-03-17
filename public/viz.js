@@ -16,7 +16,7 @@ Keen.ready(function() {
 
   var ambientNoiseChart = new Keen.Dataviz()
     .el("#ambient_noise")
-    .height(window.innerHeight)
+    .height(window.innerHeight / 2)
     .title("Last Day Noise")
     .type("spline")
     .prepare();
@@ -174,7 +174,7 @@ Keen.ready(function() {
 
   client.draw(query, document.getElementById("daily_humidity"), {
     title: "Last Day Humidity",
-    height: window.innerHeight,
+    height: window.innerHeight / 2,
     vAxis: { gridLines: 12 }
   });
 
@@ -183,7 +183,7 @@ Keen.ready(function() {
     document.getElementById("daily_temperature"),
     {
       title: "Last Day Temperature",
-      height: window.innerHeight,
+      height: window.innerHeight / 2,
       vAxis: { gridLines: 12 }
     }
   );
