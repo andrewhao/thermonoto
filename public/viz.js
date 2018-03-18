@@ -229,3 +229,5 @@ var node = document.getElementById("app-root");
 var app = Elm.App.embed(node, {
   serverUrl: "<%= process.env.CANONICAL_URL %>"
 });
+
+setInterval(function() { window.location.reload(true); }, 50000);
