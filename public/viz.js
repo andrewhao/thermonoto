@@ -230,4 +230,7 @@ var app = Elm.App.embed(node, {
   serverUrl: "<%= process.env.CANONICAL_URL %>"
 });
 
+setTimeout(function() {
+  document.getElementById('cry_detection').scrollIntoView();
+}, 5000);
 setInterval(function() { window.location.reload(true); }, 50000);
