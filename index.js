@@ -57,6 +57,10 @@ app.get("/", function(request, response) {
   response.render("index.html.ejs");
 });
 
+app.get("/cry", function(request, response) {
+  response.render("cry.html.ejs");
+});
+
 app.get("/operating_hours", function(request, response) {
   fetchOperatingHours(redisClient).then(function(results) {
     var startTime = results[0];
