@@ -150,14 +150,14 @@ Keen.ready(function() {
               ]
             };
           });
-        var result$ = data$.toArray().subscribe(function(result) {
-          // chart the data
-          result = _.dropRight(result, 2);
-          ambientNoiseChart.parseRawData({ result: result }).render();
-        });
-        var firstData$ = data$.take(1).subscribe(function(result) {
-          console.log(result);
-        });
+        var result$ = data$
+          .toArray()
+          .first()
+          .subscribe(function(result) {
+            // chart the data
+            result = _.dropRight(result, 2);
+            ambientNoiseChart.parseRawData({ result: result }).render();
+          });
       });
   };
   queryAndRenderAmbientNoiseQueries();
