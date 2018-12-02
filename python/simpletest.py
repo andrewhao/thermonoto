@@ -22,6 +22,7 @@
 # SOFTWARE.
 import Adafruit_DHT
 import requests
+import os
 
 # Sensor should be set to Adafruit_DHT.DHT11,
 # Adafruit_DHT.DHT22, or Adafruit_DHT.AM2302.
@@ -40,7 +41,7 @@ pin = 4
 humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
 temperature = temperature * 9/5.0 + 32
 
-data = dict(temperature=temperature, humidity=humidity, device_id='rpi2')
+data = dict(temperature=temperature, humidity=humidity, device_id=os.environ['HOSTNAME'])
 
 response = requests.post('http://thermonoto.herokuapp.com/temperature_updates', data=data)
 print('Posting with', data)
