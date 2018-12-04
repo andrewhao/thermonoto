@@ -194,7 +194,7 @@ Keen.ready(function() {
       {
         operator: "eq",
         property_name: "device_id",
-        property_value: "rpi2"
+        property_value: "flyhost"
       }
     ],
     target_property: "temperature",
@@ -203,7 +203,7 @@ Keen.ready(function() {
   });
 
   client.draw(query2, document.getElementById("current_temperature"), {
-    title: "Current Temperature (RPi2)"
+    title: "Current Temperature (Flyhost)"
   });
 
   var query3 = new Keen.Query("average", {
@@ -212,7 +212,7 @@ Keen.ready(function() {
       {
         operator: "eq",
         property_name: "device_id",
-        property_value: "rpi2"
+        property_value: "flyhost"
       }
     ],
     target_property: "humidity",
@@ -221,7 +221,7 @@ Keen.ready(function() {
   });
 
   client.draw(query3, document.getElementById("current_humidity"), {
-    title: "Current Humidity (RPi2)"
+    title: "Current Humidity (Flyhost)"
   });
 });
 
