@@ -11,6 +11,7 @@ var Schedule = require("./services/schedule");
 var Thermostat = require("./services/thermostat");
 var Switch = require("./services/switch");
 var fetchOperatingHours = require("./services/fetchOperatingHours");
+var writeMetric = require('./services/influx').writeMetric;
 
 var redis = require("redis");
 Promise.promisifyAll(redis.RedisClient.prototype);
@@ -20,8 +21,8 @@ var redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
 var redisClient = redis.createClient(redisUrl);
 
 keen = keenIO.configure({
-  projectId: process.env.KEEN_PROJECT_ID,
-  writeKey: process.env.KEEN_WRITE_KEY
+  projectId: process.env.KEEN_PROJECT_ID || "default",
+  writeKey: process.env.KEEN_WRITE_KEY || "default,"
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -101,25 +102,22 @@ app.post("/ambient_noise_updates", function(request, response) {
   var rms_lev_db = parseFloat(request.body.rms_lev_db);
   var pk_lev_db = parseFloat(request.body.pk_lev_db);
 
-  keen.addEvent(
+  writeMetric(
     "ambient_noise_updates",
     {
       rms_tr_db: rms_tr_db,
       rms_pk_db: rms_pk_db,
       rms_lev_db: rms_lev_db,
       pk_lev_db: pk_lev_db,
-      device_id: request.body.device_id,
-    },
-    function(err, res) {
-      if (err) {
-        console.error("Error updating Keen", err);
-        throw "Error updating Keen.";
-      } else {
-        console.log("successfully logged to Keen");
-        response.sendStatus(200);
-      }
+      device_id: request.body.device_id
     }
-  );
+  ).then(() => {
+    response.sendStatus(200);
+  })
+  .catch(err => {
+    console.error("Error updating metrics", err);
+    throw err;
+  });
 });
 
 app.post("/cry_detection_updates", function(request, response) {
@@ -129,26 +127,19 @@ app.post("/cry_detection_updates", function(request, response) {
   var humanString = request.body.human_string;
   var receivedAt = moment.tz(request.body.received_at, "Etc/UTC");
 
-  keen.addEvent(
+  writeMetric(
     "cry_detection_updates",
     {
       is_crying: isCrying,
-      keen: {
-        timestamp: receivedAt
-      },
       score: score,
       human_string: humanString
-    },
-    function(err, res) {
-      if (err) {
-        console.error("Error updating Keen", err);
-        throw "Error updating Keen.";
-      } else {
-        console.log("successfully logged to Keen");
-        response.sendStatus(200);
-      }
     }
-  );
+  ).then(() => {
+    response.sendStatus(200);
+  }).catch(err => {
+    console.error("Error updating metrics", err);
+    throw err;
+  });
 });
 
 app.post("/temperature_updates", function(request, response) {
@@ -157,24 +148,20 @@ app.post("/temperature_updates", function(request, response) {
   var humidity = parseFloat(request.body.humidity);
 
   toggleFan(humidity).then(function(isFanOn) {
-    keen.addEvent(
+    writeMetric(
       "temperature_updates",
       {
         temperature: temperature,
         humidity: humidity,
         isFanOn: isFanOn,
-        device_id: request.body.device_id,
-      },
-      function(err, res) {
-        if (err) {
-          console.error("Error updating Keen", err);
-          throw "Error updating Keen.";
-        } else {
-          console.log("successfully logged to Keen");
-          response.sendStatus(200);
-        }
+        device_id: request.body.device_id
       }
-    );
+    ).then(() => {
+      response.sendStatus(200);
+    }).catch(err => {
+      console.error("Error updating metric", err);
+      throw err;
+    });
   });
 });
 
