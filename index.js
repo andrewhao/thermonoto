@@ -104,13 +104,18 @@ app.post("/ambient_noise_updates", function(request, response) {
   var rms_lev_db = parseFloat(request.body.rms_lev_db);
   var pk_lev_db = parseFloat(request.body.pk_lev_db);
 
-  writeMetric("ambient_noise_updates", {
-    rms_tr_db: rms_tr_db,
-    rms_pk_db: rms_pk_db,
-    rms_lev_db: rms_lev_db,
-    pk_lev_db: pk_lev_db,
-    device_id: request.body.device_id
-  })
+  writeMetric(
+    "ambient_noise_updates",
+    {
+      rms_tr_db: rms_tr_db,
+      rms_pk_db: rms_pk_db,
+      rms_lev_db: rms_lev_db,
+      pk_lev_db: pk_lev_db
+    },
+    {
+      device_id: request.body.device_id
+    }
+  )
     .then(() => {
       response.sendStatus(200);
     })
@@ -127,11 +132,17 @@ app.post("/cry_detection_updates", function(request, response) {
   var humanString = request.body.human_string;
   var receivedAt = moment.tz(request.body.received_at, "Etc/UTC");
 
-  writeMetric("cry_detection_updates", {
-    is_crying: isCrying,
-    score: score,
-    human_string: humanString
-  })
+  writeMetric(
+    "cry_detection_updates",
+    {
+      is_crying: isCrying,
+      score: score,
+      human_string: humanString
+    },
+    {
+      device_id: request.body.device_id
+    }
+  )
     .then(() => {
       response.sendStatus(200);
     })
@@ -147,12 +158,17 @@ app.post("/temperature_updates", function(request, response) {
   var humidity = parseFloat(request.body.humidity);
 
   toggleFan(humidity).then(function(isFanOn) {
-    writeMetric("temperature_updates", {
-      temperature: temperature,
-      humidity: humidity,
-      isFanOn: isFanOn,
-      device_id: request.body.device_id
-    })
+    writeMetric(
+      "temperature_updates",
+      {
+        temperature: temperature,
+        humidity: humidity,
+        isFanOn: isFanOn
+      },
+      {
+        device_id: request.body.device_id
+      }
+    )
       .then(() => {
         response.sendStatus(200);
       })
