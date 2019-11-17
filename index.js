@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 var express = require("express");
 var bodyParser = require("body-parser");
 var keenIO = require("keen.io");
@@ -11,7 +13,7 @@ var Schedule = require("./services/schedule");
 var Thermostat = require("./services/thermostat");
 var Switch = require("./services/switch");
 var fetchOperatingHours = require("./services/fetchOperatingHours");
-var writeMetric = require('./services/influx').writeMetric;
+var writeMetric = require("./services/influx").writeMetric;
 
 var redis = require("redis");
 Promise.promisifyAll(redis.RedisClient.prototype);
@@ -102,22 +104,20 @@ app.post("/ambient_noise_updates", function(request, response) {
   var rms_lev_db = parseFloat(request.body.rms_lev_db);
   var pk_lev_db = parseFloat(request.body.pk_lev_db);
 
-  writeMetric(
-    "ambient_noise_updates",
-    {
-      rms_tr_db: rms_tr_db,
-      rms_pk_db: rms_pk_db,
-      rms_lev_db: rms_lev_db,
-      pk_lev_db: pk_lev_db,
-      device_id: request.body.device_id
-    }
-  ).then(() => {
-    response.sendStatus(200);
+  writeMetric("ambient_noise_updates", {
+    rms_tr_db: rms_tr_db,
+    rms_pk_db: rms_pk_db,
+    rms_lev_db: rms_lev_db,
+    pk_lev_db: pk_lev_db,
+    device_id: request.body.device_id
   })
-  .catch(err => {
-    console.error("Error updating metrics", err);
-    throw err;
-  });
+    .then(() => {
+      response.sendStatus(200);
+    })
+    .catch(err => {
+      console.error("Error updating metrics", err);
+      throw err;
+    });
 });
 
 app.post("/cry_detection_updates", function(request, response) {
@@ -127,19 +127,18 @@ app.post("/cry_detection_updates", function(request, response) {
   var humanString = request.body.human_string;
   var receivedAt = moment.tz(request.body.received_at, "Etc/UTC");
 
-  writeMetric(
-    "cry_detection_updates",
-    {
-      is_crying: isCrying,
-      score: score,
-      human_string: humanString
-    }
-  ).then(() => {
-    response.sendStatus(200);
-  }).catch(err => {
-    console.error("Error updating metrics", err);
-    throw err;
-  });
+  writeMetric("cry_detection_updates", {
+    is_crying: isCrying,
+    score: score,
+    human_string: humanString
+  })
+    .then(() => {
+      response.sendStatus(200);
+    })
+    .catch(err => {
+      console.error("Error updating metrics", err);
+      throw err;
+    });
 });
 
 app.post("/temperature_updates", function(request, response) {
@@ -148,20 +147,19 @@ app.post("/temperature_updates", function(request, response) {
   var humidity = parseFloat(request.body.humidity);
 
   toggleFan(humidity).then(function(isFanOn) {
-    writeMetric(
-      "temperature_updates",
-      {
-        temperature: temperature,
-        humidity: humidity,
-        isFanOn: isFanOn,
-        device_id: request.body.device_id
-      }
-    ).then(() => {
-      response.sendStatus(200);
-    }).catch(err => {
-      console.error("Error updating metric", err);
-      throw err;
-    });
+    writeMetric("temperature_updates", {
+      temperature: temperature,
+      humidity: humidity,
+      isFanOn: isFanOn,
+      device_id: request.body.device_id
+    })
+      .then(() => {
+        response.sendStatus(200);
+      })
+      .catch(err => {
+        console.error("Error updating metric", err);
+        throw err;
+      });
   });
 });
 
