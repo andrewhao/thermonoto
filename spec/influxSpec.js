@@ -33,12 +33,11 @@ describe("influx", function() {
         INFLUXDB_TOKEN,
         fakeRequest
       ).then(() => {
-        expect(
-          fakeRequest.post.calledWith(expectedUrl, {
-            body: `temperature,host=raspberrypi temp=90`,
-            headers: expectedAuthorizationHeader
-          })
-        ).to.eql(true);
+        sinon.assert.calledWith(fakeRequest.post, expectedUrl, {
+          body: `temperature,host=raspberrypi temp=90`,
+          headers: expectedAuthorizationHeader
+        });
+
         done();
       });
     });
@@ -54,33 +53,72 @@ describe("influx", function() {
         INFLUXDB_TOKEN,
         fakeRequest
       ).then(() => {
-        expect(
-          fakeRequest.post.calledWith(expectedUrl, {
-            body: `temperature,host=raspberrypi,region=us-west temp=90`,
-            headers: expectedAuthorizationHeader
-          })
-        ).to.eql(true);
+        sinon.assert.calledWith(fakeRequest.post, expectedUrl, {
+          body: `temperature,host=raspberrypi,region=us-west temp=90`,
+          headers: expectedAuthorizationHeader
+        });
+
         done();
       });
     });
 
-    it("writes metrics for multiple fields", function(done) {
+    describe("data type casting", () => {
+      it("wraps string field values in double quotes", done => {
+        writeMetric(
+          "temperature",
+          { temp: 90, location: "upstairs" },
+          {},
+          INFLUXDB_ORG_ID,
+          INFLUXDB_BUCKET_ID,
+          INFLUXDB_SERVER_URL,
+          INFLUXDB_TOKEN,
+          fakeRequest
+        ).then(() => {
+          sinon.assert.calledWith(fakeRequest.post, expectedUrl, {
+            body: `temperature location="upstairs",temp=90`,
+            headers: expectedAuthorizationHeader
+          });
+
+          done();
+        });
+      });
+
+      it("forces an is_* boolean field value to use true/false values", done => {
+        writeMetric(
+          "temperature",
+          { is_crying: 0, is_sleeping: 1 },
+          {},
+          INFLUXDB_ORG_ID,
+          INFLUXDB_BUCKET_ID,
+          INFLUXDB_SERVER_URL,
+          INFLUXDB_TOKEN,
+          fakeRequest
+        ).then(() => {
+          sinon.assert.calledWith(fakeRequest.post, expectedUrl, {
+            body: `temperature is_crying=false,is_sleeping=true`,
+            headers: expectedAuthorizationHeader
+          });
+
+          done();
+        });
+      });
+    });
+
+    it("writes metrics for multiple fields, sorting on keys and tags", function(done) {
       writeMetric(
         "temperature",
-        { temp: 90.0, location: "upstairs" },
-        { host: "raspberrypi", region: "us-west" },
+        { temp: 90.0, humidity: 70.2 },
+        { region: "us-west", host: "raspberrypi" },
         INFLUXDB_ORG_ID,
         INFLUXDB_BUCKET_ID,
         INFLUXDB_SERVER_URL,
         INFLUXDB_TOKEN,
         fakeRequest
       ).then(() => {
-        expect(
-          fakeRequest.post.calledWith(expectedUrl, {
-            body: `temperature,host=raspberrypi,region=us-west temp=90,location=upstairs`,
-            headers: expectedAuthorizationHeader
-          })
-        ).to.eql(true);
+        sinon.assert.calledWith(fakeRequest.post, expectedUrl, {
+          body: `temperature,host=raspberrypi,region=us-west humidity=70.2,temp=90`,
+          headers: expectedAuthorizationHeader
+        });
 
         done();
       });
