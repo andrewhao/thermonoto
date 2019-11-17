@@ -140,7 +140,8 @@ app.post("/cry_detection_updates", function(request, response) {
       human_string: humanString
     },
     {
-      device_id: request.body.device_id
+      device_id: request.body.device_id,
+      human_string: humanString
     }
   )
     .then(() => {
