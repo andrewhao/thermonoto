@@ -649,10 +649,10 @@ isarray@~1.0.0:
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
   integrity sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
 
-isomorphic-influx@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/isomorphic-influx/-/isomorphic-influx-1.0.0.tgz#5f885bf6d69fec4c4dbde0bd8db53f667a9ba6a5"
-  integrity sha512-QLFg5GORHEWrr/j8NUqZBEtLiyp3TXzytz9BvQ/qUok/jnv6t7wmBJ1Fr5bO0kggH8iJ0fNXtuDd/prLRX5bPQ==
+isomorphic-influx@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-influx/-/isomorphic-influx-1.0.1.tgz#6af7237044da46703bd9704947f175447ef88291"
+  integrity sha512-bnlLngzGXnvFjBOHxAxs+fnVub2WZ1L4jaj8fhqqJPZ6KkoNDONGMUcXvpjYpNfaU+V/lz2mSynFI5xcBIMC2w==
   dependencies:
     isomorphic-unfetch "^3.0.0"
 
