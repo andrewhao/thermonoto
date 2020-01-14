@@ -13,7 +13,7 @@ var Schedule = require("./services/schedule");
 var Thermostat = require("./services/thermostat");
 var Switch = require("./services/switch");
 var fetchOperatingHours = require("./services/fetchOperatingHours");
-var writeMetric = require("./services/influx").writeMetric;
+var writeMetric = require("isomorphic-influx").writeMetric;
 
 var redis = require("redis");
 Promise.promisifyAll(redis.RedisClient.prototype);
