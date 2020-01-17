@@ -158,6 +158,10 @@ app.post("/temperature_updates", function(request, response) {
   var temperature = parseFloat(request.body.temperature);
   var humidity = parseFloat(request.body.humidity);
 
+  if (humidity > 100) {
+    return response.sendStatus(400);
+  }
+
   toggleFan(humidity).then(function(isFanOn) {
     writeMetric(
       "temperature_updates",
