@@ -1,9 +1,8 @@
-#!/usr/bin/python
 import adafruit_dht
 import board
 import requests
 import os
-import time
+from time import sleep
 
 sensor = adafruit_dht.DHT22(board.D4)
 
@@ -16,15 +15,17 @@ while (tries < MAX_TRIES):
     try:
         humidity = sensor.humidity
         temperature = sensor.temperature
+        break
     except RuntimeError as error:
         # Errors happen fairly often, DHT's are hard to read, just keep going
         print(error.args[0])
-        time.sleep(2.0)
+        sleep(2.0)
         tries += 1
         continue
     except Exception as error:
         sensor.exit()
         raise error
+    sleep(2.0)
 
 temperature = temperature * 9/5.0 + 32
 
