@@ -3,10 +3,12 @@ import adafruit_dht
 import board
 import requests
 import os
+import time
 
 sensor = adafruit_dht.DHT22(board.D4)
 
 MAX_TRIES = 3
+tries = 0
 
 # Try to grab a sensor reading.  Use the read_retry method which will retry up
 # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
@@ -21,7 +23,7 @@ while (tries < MAX_TRIES):
         tries += 1
         continue
     except Exception as error:
-        dhtDevice.exit()
+        sensor.exit()
         raise error
 
 temperature = temperature * 9/5.0 + 32
