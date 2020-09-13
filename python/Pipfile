@@ -7,8 +7,8 @@ verify_ssl = true
 
 [packages]
 requests = "*"
+"RPi.GPIO" = "*"
 adafruit-circuitpython-dht = "*"
-RPI.GPIO = "*"
 adafruit-blinka = "*"
 
 [requires]
