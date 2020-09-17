@@ -153,6 +153,28 @@ app.post("/cry_detection_updates", function(request, response) {
     });
 });
 
+app.post("/air_quality_updates", express.json(), function(request, response) {
+  console.log(request.body);
+
+  const metric = {...request.body};
+  delete metric.device_id
+
+  writeMetric(
+    "air_quality_updates",
+    metric,
+    {
+      device_id: request.body.device_id,
+    }
+  )
+    .then(() => {
+      response.sendStatus(200);
+    })
+    .catch(err => {
+      console.error("Error updating metrics", err);
+      throw err;
+    });
+});
+
 app.post("/temperature_updates", function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
