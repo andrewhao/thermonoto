@@ -153,7 +153,7 @@ app.post("/cry_detection_updates", function(request, response) {
     });
 });
 
-app.post("/air_quality_updates", express.json(), function(request, response) {
+app.post("/air_quality_updates", bodyParser.json(), function(request, response) {
   console.log(request.body);
 
   const metric = {...request.body};
