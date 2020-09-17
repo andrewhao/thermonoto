@@ -27,7 +27,8 @@ keen = keenIO.configure({
   writeKey: process.env.KEEN_WRITE_KEY || "default,"
 });
 
-app.use(bodyParser.urlencoded({ extended: true }));
+const urlencodedParser = bodyParser.urlencoded({ extended: true });
+
 app.set("port", process.env.PORT || 5000);
 app.use(express.static("public"));
 
@@ -96,7 +97,7 @@ app.get("/temperature_updates", function(request, response) {
   response.sendStatus(200);
 });
 
-app.post("/ambient_noise_updates", function(request, response) {
+app.post("/ambient_noise_updates", urlencodedParser, function(request, response) {
   console.log(request.body);
   // {'pk_lev_db': '-48.51', 'rms_tr_db': '-79.41', 'rms_pk_db': '-61.28', 'rms_lev_db': '-75.40'}
   var rms_tr_db = parseFloat(request.body.rms_tr_db);
@@ -125,7 +126,7 @@ app.post("/ambient_noise_updates", function(request, response) {
     });
 });
 
-app.post("/cry_detection_updates", function(request, response) {
+app.post("/cry_detection_updates", urlencodedParser, function(request, response) {
   console.log(request.body);
   var isCrying = parseInt(request.body.is_crying);
   var score = parseFloat(request.body.score);
@@ -175,7 +176,7 @@ app.post("/air_quality_updates", bodyParser.json(), function(request, response) 
     });
 });
 
-app.post("/temperature_updates", function(request, response) {
+app.post("/temperature_updates", urlencodedParser, function(request, response) {
   console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
   var humidity = parseFloat(request.body.humidity);
