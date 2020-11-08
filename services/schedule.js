@@ -12,7 +12,7 @@ Schedule.prototype.isOn = function(currentTime) {
   } else {
     this.currentTime = currentTime;
   }
-  console.log('currentTime', this.currentTime.format());
+  console.debug('currentTime', this.currentTime.format());
   var hours = this.currentTime.hours();
 
   var startHours = this.startTime.getHours();
@@ -22,7 +22,7 @@ Schedule.prototype.isOn = function(currentTime) {
     endHours += 24
   }
 
-  console.log('startHours', startHours, 'endHours', endHours, 'currentHours', hours);
+  console.debug('startHours', startHours, 'endHours', endHours, 'currentHours', hours);
 
   return hours >= startHours && hours <= endHours;
 }
