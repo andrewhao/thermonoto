@@ -1,7 +1,6 @@
 var writeMetric = require("isomorphic-influx").writeMetric;
 
-const writeMetricAndArchive(metricName, fieldSet, keySet) => {
-
+const writeMetricAndArchive = (metricName, fieldSet, keySet) => {
 }
 
 module.exports = {

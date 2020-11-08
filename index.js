@@ -45,13 +45,11 @@ function toggleFan(temp) {
     var scheduler = new Schedule(startTime, endTime);
 
     if (!scheduler.isOn()) {
-      console.log("Outside the hours of fan management. Skipping....");
       return theSwitch.flipOff().then(() => false);
     }
 
     var thermostat = new Thermostat(TEMP_THRESHOLD, theSwitch);
     return thermostat.trigger(temp).catch(err => {
-      console.error(err);
       return Promise.resolve(false);
     });
   });
@@ -78,7 +76,6 @@ app.get("/operating_hours", function(request, response) {
 });
 
 app.put("/operating_hours", function(request, response) {
-  console.log(request.body);
   var hours = {
     start_time: request.body.start_time,
     end_time: request.body.end_time
@@ -98,7 +95,6 @@ app.get("/temperature_updates", function(request, response) {
 });
 
 app.post("/ambient_noise_updates", urlencodedParser, function(request, response) {
-  console.log(request.body);
   // {'pk_lev_db': '-48.51', 'rms_tr_db': '-79.41', 'rms_pk_db': '-61.28', 'rms_lev_db': '-75.40'}
   var rms_tr_db = parseFloat(request.body.rms_tr_db);
   var rms_pk_db = parseFloat(request.body.rms_pk_db);
@@ -121,13 +117,11 @@ app.post("/ambient_noise_updates", urlencodedParser, function(request, response)
       response.sendStatus(200);
     })
     .catch(err => {
-      console.error("Error updating metrics", err);
-      throw err;
-    });
+    throw err;
+  });
 });
 
 app.post("/cry_detection_updates", urlencodedParser, function(request, response) {
-  console.log(request.body);
   var isCrying = parseInt(request.body.is_crying);
   var score = parseFloat(request.body.score);
   var humanString = request.body.human_string;
@@ -149,14 +143,11 @@ app.post("/cry_detection_updates", urlencodedParser, function(request, response)
       response.sendStatus(200);
     })
     .catch(err => {
-      console.error("Error updating metrics", err);
-      throw err;
-    });
+    throw err;
+  });
 });
 
 app.post("/air_quality_updates", bodyParser.json(), function(request, response) {
-  console.log(request.body);
-
   const metric = {...request.body};
   delete metric.device_id
 
@@ -171,13 +162,11 @@ app.post("/air_quality_updates", bodyParser.json(), function(request, response) 
       response.sendStatus(200);
     })
     .catch(err => {
-      console.error("Error updating metrics", err);
-      throw err;
-    });
+    throw err;
+  });
 });
 
 app.post("/temperature_updates", urlencodedParser, function(request, response) {
-  console.log(request.body);
   var temperature = parseFloat(request.body.temperature);
   var humidity = parseFloat(request.body.humidity);
 
@@ -201,12 +190,9 @@ app.post("/temperature_updates", urlencodedParser, function(request, response) {
         response.sendStatus(200);
       })
       .catch(err => {
-        console.error("Error updating metric", err);
-        throw err;
-      });
+      throw err;
+    });
   });
 });
 
-app.listen(app.get("port"), function() {
-  console.log("Node app is running on port", app.get("port"));
-});
+app.listen(app.get("port"), function() {});
