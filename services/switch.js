@@ -12,10 +12,10 @@ var tooColdUrl = 'https://maker.ifttt.com/trigger/too_cold/with/key/cYteZfZjX6aU
 
 Switch.prototype.flipOn = function(temp) {
   if(!this.isEnabled) {
-    console.log('[Switch] Disabled, exiting.');
+    console.debug('[Switch] Disabled, exiting.');
     return Promise.resolve(false);
   }
-  console.log('[Switch] Turning on.');
+  console.debug('[Switch] Turning on.');
   return this.request(tooHotUrl).then(() => true);
 };
 
