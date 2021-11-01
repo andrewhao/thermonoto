@@ -195,4 +195,21 @@ app.post("/temperature_updates", urlencodedParser, function(request, response) {
   });
 });
 
+
+app.post("/motion_detection_updates", urlencodedParser, function(request, response) {
+  writeMetric(
+    "motion_detection_updates",
+    {},
+    {
+      device_id: request.body.device_id
+    }
+  )
+    .then(() => {
+      response.sendStatus(200);
+    })
+    .catch(err => {
+    throw err;
+  });
+});
+
 app.listen(app.get("port"), function() {});
