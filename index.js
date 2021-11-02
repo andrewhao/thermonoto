@@ -199,7 +199,9 @@ app.post("/temperature_updates", urlencodedParser, function(request, response) {
 app.post("/motion_detection_updates", urlencodedParser, function(request, response) {
   writeMetric(
     "motion_detection_updates",
-    {},
+    {
+      motion_detected: true
+    },
     {
       device_id: request.body.device_id
     }
