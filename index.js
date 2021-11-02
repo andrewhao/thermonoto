@@ -200,7 +200,7 @@ app.post("/motion_detection_updates", urlencodedParser, function(request, respon
   writeMetric(
     "motion_detection_updates",
     {
-      motion_detected: true
+      motion_detected: 1
     },
     {
       device_id: request.body.device_id
