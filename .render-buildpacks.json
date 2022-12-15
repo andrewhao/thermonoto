@@ -1,0 +1,6 @@
+{
+  "buildpacks": [
+    "https://github.com/srid/heroku-buildpack-elm",
+    "heroku/nodejs"
+  ]
+}
