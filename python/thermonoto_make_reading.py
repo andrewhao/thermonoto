@@ -6,6 +6,8 @@ from time import sleep
 
 sensor = adafruit_dht.DHT22(board.D4)
 
+THERMONOTO_CLOUD_BASE_URL = os.environ['THERMONOTO_CLOUD_BASE_URL']
+
 MAX_TRIES = 3
 tries = 0
 
@@ -31,7 +33,7 @@ temperature = temperature * 9/5.0 + 32
 
 data = dict(temperature=temperature, humidity=humidity, device_id=os.environ['HOSTNAME'])
 
-response = requests.post('http://thermonoto.herokuapp.com/temperature_updates', data=data)
+response = requests.post(f'{THERMONOTO_CLOUD_BASE_URL}/temperature_updates', data=data)
 print('Posting with', data)
 print(response)
 
