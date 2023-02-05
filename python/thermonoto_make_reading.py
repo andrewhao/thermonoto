@@ -33,7 +33,7 @@ temperature = temperature * 9/5.0 + 32
 
 data = dict(temperature=temperature, humidity=humidity, device_id=os.environ['HOSTNAME'])
 
-response = requests.post(f'{THERMONOTO_CLOUD_BASE_URL}/temperature_updates', data=data)
+response = requests.post(THERMONOTO_CLOUD_BASE_URL + '/temperature_updates', data=data)
 print('Posting with', data)
 print(response)
 
